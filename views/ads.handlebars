@@ -1,0 +1,20 @@
+<div class='container'>
+  <h3>All Ads</h3>
+
+  {{#each advert}}
+  <div class='ads card'>
+    <ul>
+      <li>{{title}}</li>
+      <li>{{description}}</li>
+      <li>{{categories}}</li>
+      <li>{{price}}</li>
+      <li>{{contact_email}}</li>
+      <li>{{createdAt}}</li>
+      <li>{{updatedAt}}</li>
+    </ul>
+  </div>
+  {{else}}
+    <p>No adverts posted</p>
+  {{/each}}
+</div>
+
