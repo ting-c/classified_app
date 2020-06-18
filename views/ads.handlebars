@@ -1,17 +1,37 @@
 <div class='container'>
-  <h3>All Ads</h3>
+  <h3 class='text-center'>All Ads</h3>
 
-  {{#each advert}}
-  <div class='ads card'>
-    <ul>
-      <li>{{title}}</li>
-      <li>{{description}}</li>
-      <li>{{categories}}</li>
-      <li>{{price}}</li>
-      <li>{{contact_email}}</li>
-      <li>{{createdAt}}</li>
-      <li>{{updatedAt}}</li>
-    </ul>
+  {{#each ads}}
+  <div class='ads card m-2 shadow-sm'>
+    <div class='card-body'>
+      <h4 class='text-white bg-primary p-2'>{{title}}</h4>
+      <table class='table table-borderless'>
+        <tr>
+          <td>Description:</td>
+          <td>{{description}}</td>
+        </tr>
+        <tr>
+          <td>Categories:</td>
+          <td>{{categories}}</td>
+        </tr>
+        <tr>
+          <td>Price:</td>
+          <td>{{price}}</td>
+        </tr>
+        <tr>
+          <td>Contact Email:</td>
+          <td>{{contact_email}}</td>
+        </tr>
+        <tr>
+          <td>Created At:</td>
+          <td>{{createdAt}}</td>
+        </tr>
+        <tr>
+          <td>Updated At:</td>
+          <td>{{updatedAt}}</td>
+        </tr>
+      </table>      
+    </div>
   </div>
   {{else}}
     <p>No adverts posted</p>

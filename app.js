@@ -1,6 +1,5 @@
 const express = require('express');
 const exphbs = require('express-handlebars');
-const path = require('path');
 const db = require('./config/db');
 
 // Test DB
@@ -13,10 +12,12 @@ const app = express();
 app.engine('handlebars', exphbs({ defaultLayout: 'main' }));
 app.set('view engine', 'handlebars');
 
+app.use(express.urlencoded({ extended: false }));
+
 // static folder
 app.use(express.static("public"));
 
-app.get('/', (req, res) => res.send('hello'));
+app.get('/', (req, res) => res.render('index', { layout: 'landing'}));
 
 app.use('/ads', require('./routes/ads'));
 

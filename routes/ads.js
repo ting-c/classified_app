@@ -1,31 +1,41 @@
 const express = require('express');
 const router = express.Router();
-const db = require('../config/db');
 const Advert = require('../models/Advert');
 
 router.get('/', (req, res) => 
-  Advert.findAll()
+  Advert.findAll({ raw:true })
     .then(ads => {
-      res.render('ads', { ads })
+      res.render('ads', { ads });
     })
     .catch(err => console.log(err)));
 
 router.get('/post', (req, res) => {
-  const data = {
-    title: 'Size 5 football',
-    description: 'Used condiiton',
-    categories: 'sports',
-    price: 2,
-    contact_email: 'qwerty123@gmail.com'
+  res.render('post');
+});
+
+router.post('/post', (req, res) => {
+  
+  // Server side validation
+  const fieldsToCheck = ['title', 'description', 'categories', 'price', 'contact_email'];
+  let errorLog = '';
+
+  fieldsToCheck.forEach(field => {
+    if (!req.body[field]) { errorLog += field + ', '}
+  });
+
+  const errorMessage = `Please add the following information: ` + errorLog.slice(0, -2);
+
+  if (!!errorLog) { 
+    res.render("post", {
+			errorMessage,
+			...req.body
+		});
+  } else {
+    Advert.create({ ...req.body })
+      .then(res.redirect('/ads'))
+      .catch(err => console.log(err))
   }
 
-  let { title, description, categories, price, contact_email } = data;
-
-  Advert.create({
-    title, description, categories, price, contact_email
-  })
-    .then(advert => res.redirect('/ads'))
-    .catch(err => console.log(err));
-});
+})
 
 module.exports = router;
