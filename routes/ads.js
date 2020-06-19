@@ -1,18 +1,19 @@
 const express = require('express');
 const router = express.Router();
 const Advert = require('../models/Advert');
+const { Op } = require('sequelize');
+const { sequelize } = require('../models/Advert');
 
 router.get('/', (req, res) => 
   Advert.findAll({ raw:true })
-    .then(ads => {
-      res.render('ads', { ads });
-    })
+    .then(ads => res.render('ads', { ads }))
     .catch(err => console.log(err)));
 
 router.get('/post', (req, res) => {
   res.render('post');
 });
 
+// Post
 router.post('/post', (req, res) => {
   
   // Server side validation
@@ -36,6 +37,30 @@ router.post('/post', (req, res) => {
       .catch(err => console.log(err))
   }
 
+});
+
+// Search
+router.get('/search', (req, res) => {
+  const { term } = req.query;
+
+  Advert.findAll({
+    raw: true,
+    where: { 
+      [Op.or]: {
+        title: { 
+          [Op.iLike]: `%${term}%` 
+        },
+        description: { 
+          [Op.iLike]: `%${term}%` 
+        }
+      }
+    }
+  })
+  .then(ads => {
+    res.render('ads', { ads });
+    console.log(ads)
+  })
+  .catch(err => console.log(err))
 })
 
 module.exports = router;
