@@ -1,10 +1,16 @@
 <div class='container'>
-  <h3 class='text-center'>All Ads</h3>
+  <h4 class='text-center m-3'>
+    {{#if term}}
+      Search results for {{term}}
+    {{else}}
+      All ads
+    {{/if}}
+  </h4>
 
   {{#each ads}}
-  <div class='ads card m-2 shadow-sm'>
+  <div class='ads card m-3 shadow bg-light'>
     <div class='card-body'>
-      <h4 class='text-white bg-primary p-2'>{{title}}</h4>
+      <h4 class='bg-secondary p-2'>{{title}}</h4>
       <table class='table table-borderless'>
         <tr>
           <td>Description:</td>
@@ -16,18 +22,18 @@
         </tr>
         <tr>
           <td>Price:</td>
-          <td>{{price}}</td>
+          <td>£ {{price}}</td>
         </tr>
         <tr>
           <td>Contact Email:</td>
           <td>{{contact_email}}</td>
         </tr>
         <tr>
-          <td>Created At:</td>
+          <td>Posted at:</td>
           <td>{{createdAt}}</td>
         </tr>
         <tr>
-          <td>Updated At:</td>
+          <td>Updated at:</td>
           <td>{{updatedAt}}</td>
         </tr>
       </table>      
