@@ -4,8 +4,8 @@
   "description": "Classified advertisement app",
   "main": "app.js",
   "scripts": {
-    "start": "node App.js",
-    "dev": "nodemon App.js"
+    "start": "node app.js",
+    "dev": "nodemon app.js"
   },
   "author": "ting-c",
   "dependencies": {
