@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 const Advert = require('../models/Advert');
 const { Op } = require('sequelize');
-const { sequelize } = require('../models/Advert');
 
 router.get('/', (req, res) => 
   Advert.findAll({ raw:true })
