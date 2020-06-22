@@ -10,35 +10,32 @@
   {{#each ads}}
   <div class='ads card m-3 shadow bg-light'>
     <div class='card-body'>
-      <h4 class='bg-secondary p-2'>{{title}}</h4>
+      <h5 class='bg-secondary p-2 font-weight-bold'>{{title}}</h5>
+      <div class='bg-light p-2'>
+        <h6 class='font-weight-bold'>Description</h6>
+        <p>{{description}}</p>
+      </div>
+
       <table class='table table-borderless'>
         <tr>
-          <td>Description:</td>
-          <td>{{description}}</td>
-        </tr>
-        <tr>
-          <td>Categories:</td>
-          <td>{{categories}}</td>
-        </tr>
-        <tr>
-          <td>Price:</td>
+          <td>Price</td>
           <td>£ {{price}}</td>
         </tr>
         <tr>
-          <td>Postcode:</td>
-          <td>{{postcode}}</td>
+          <td>Categories</td>
+          <td>{{categories}}</td>
         </tr>
         <tr>
-          <td>Contact Email:</td>
+          <td>Location</td>
+          <td>{{location}}</td>
+        </tr>
+        <tr>
+          <td>Contact Email</td>
           <td>{{contact_email}}</td>
         </tr>
         <tr>
-          <td>Posted at:</td>
+          <td>Posted at</td>
           <td>{{createdAt}}</td>
-        </tr>
-        <tr>
-          <td>Updated at:</td>
-          <td>{{updatedAt}}</td>
         </tr>
       </table>      
     </div>

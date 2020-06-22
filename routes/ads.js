@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const Advert = require('../models/Advert');
 const { Op } = require('sequelize');
+const { response } = require('express');
+const axios = require('axios');
 
 router.get('/', (req, res) => 
   Advert.findAll({ raw:true })
@@ -19,22 +21,42 @@ router.post('/post', (req, res) => {
   const fieldsToCheck = ['title', 'description', 'categories', 'price', 'postcode','contact_email'];
   let errorLog = '';
 
+  // check if field is empty
   fieldsToCheck.forEach(field => {
     if (!req.body[field]) { errorLog += field + ', '}
   });
 
   const errorMessage = `Please add the following information: ` + errorLog.slice(0, -2);
 
-  if (!!errorLog) { 
-    res.render("post", {
+  if (!!errorLog) {
+		res.render("post", {
 			errorMessage,
-			...req.body
-		});
-  } else {
-    Advert.create({ ...req.body })
-      .then(res.redirect('/ads'))
-      .catch(err => console.log(err))
-  }
+			...req.body,
+    });
+    return 
+	}
+
+  // check if postcode is valid
+  axios.get(`https://api.postcodes.io/postcodes/${req.body.postcode}`)
+    .then( response => {
+      const { status } = response;
+      const { postcode, longitude, latitude, admin_ward, admin_county, region } = response.data.result;
+      if (status === 200) {
+        console.log('postcode is valid', response);
+        Advert.create({
+					...req.body,
+					postcode,
+					longitude,
+					latitude,
+					location: `${admin_ward},${admin_county ? ` ${admin_county},` : ''} ${region}`
+				})
+					.then(res.redirect('/ads'))
+					.catch((err) => console.log(err));
+      } else {
+        console.log('Invalid postcode');
+      }
+    })
+    .catch(error => console.log('Failed connection to API', error));
 
 });
 
