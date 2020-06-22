@@ -16,7 +16,7 @@ router.get('/post', (req, res) => {
 router.post('/post', (req, res) => {
   
   // Server side validation
-  const fieldsToCheck = ['title', 'description', 'categories', 'price', 'contact_email'];
+  const fieldsToCheck = ['title', 'description', 'categories', 'price', 'postcode','contact_email'];
   let errorLog = '';
 
   fieldsToCheck.forEach(field => {

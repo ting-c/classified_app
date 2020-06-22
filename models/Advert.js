@@ -14,6 +14,9 @@ const Advert = db.define('advert', {
   price: {
     type: Sequelize.STRING
   },
+  postcode: {
+    type: Sequelize.STRING
+  },
   contact_email: {
     type: Sequelize.STRING
   }
