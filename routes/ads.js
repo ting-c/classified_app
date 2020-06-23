@@ -5,25 +5,28 @@ const { Op } = require('sequelize');
 const axios = require('axios');
 const getDistance = require('../getDistance');
 
+const addDistanceForAds = ads => {
+  adsWithDistance = [];
+  ads.forEach(ad => {
+    const userLocation = {
+      lat: 51.1465,
+      lng: 0.875,
+    };
+    const sellerLocation = {
+      lat: ad['latitude'],
+      lng: ad['longitude']
+    };
+    const distance = getDistance(userLocation, sellerLocation, true);
+    console.log(userLocation, sellerLocation, distance);
+    adsWithDistance.push({ ...ad, distance }); 
+  });  
+  return adsWithDistance;
+}
+
 router.get('/', (req, res) => 
   Advert.findAll({ raw:true })
     .then(ads => {
-      console.log(ads);
-      adsWithLocation = [];
-      ads.forEach(ad => {
-        const userLocation = {
-          lat: 51.1465,
-          lng: 0.875,
-        };
-        const sellerLocation = {
-          lat: ad['latitude'],
-          lng: ad['longitude']
-        };
-        const distance = getDistance(userLocation, sellerLocation, true);
-        console.log(userLocation, sellerLocation, distance);
-        adsWithLocation.push({ ...ad, distance });
-      })
-      res.render('ads', { ads: adsWithLocation });
+      res.render('ads', { ads: addDistanceForAds(ads) });
     })
     .catch(err => console.log(err)));
 
@@ -72,13 +75,10 @@ router.post('/post', (req, res) => {
       }
     })
     .catch(error => {
-      console.log('Line 76', error);
-      console.log('Line 77', req.body);
       res.render('post', {
         errorMessage: 'Invalid postcode',
         ...req.body
       });
-      console.log(req.body)
     });
 });
 
@@ -100,7 +100,7 @@ router.get('/search', (req, res) => {
     }
   })
   .then(ads => {
-    res.render('ads', { ads, term });
+    res.render('ads', { ads: addDistanceForAds(ads), term });
     console.log(ads)
   })
   .catch(err => console.log(err))
