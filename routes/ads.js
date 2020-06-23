@@ -2,12 +2,29 @@ const express = require('express');
 const router = express.Router();
 const Advert = require('../models/Advert');
 const { Op } = require('sequelize');
-const { response } = require('express');
 const axios = require('axios');
+const getDistance = require('../getDistance');
 
 router.get('/', (req, res) => 
   Advert.findAll({ raw:true })
-    .then(ads => res.render('ads', { ads }))
+    .then(ads => {
+      console.log(ads);
+      adsWithLocation = [];
+      ads.forEach(ad => {
+        const userLocation = {
+          lat: 51.1465,
+          lng: 0.875,
+        };
+        const sellerLocation = {
+          lat: ad['latitude'],
+          lng: ad['longitude']
+        };
+        const distance = getDistance(userLocation, sellerLocation, true);
+        console.log(userLocation, sellerLocation, distance);
+        adsWithLocation.push({ ...ad, distance });
+      })
+      res.render('ads', { ads: adsWithLocation });
+    })
     .catch(err => console.log(err)));
 
 router.get('/post', (req, res) => {
@@ -52,12 +69,17 @@ router.post('/post', (req, res) => {
 				})
 					.then(res.redirect('/ads'))
 					.catch((err) => console.log(err));
-      } else {
-        console.log('Invalid postcode');
       }
     })
-    .catch(error => console.log('Failed connection to API', error));
-
+    .catch(error => {
+      console.log('Line 76', error);
+      console.log('Line 77', req.body);
+      res.render('post', {
+        errorMessage: 'Invalid postcode',
+        ...req.body
+      });
+      console.log(req.body)
+    });
 });
 
 // Search
