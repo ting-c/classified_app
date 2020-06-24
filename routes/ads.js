@@ -101,7 +101,6 @@ router.get('/search', (req, res) => {
   })
   .then(ads => {
     res.render('ads', { ads: addDistanceForAds(ads), term });
-    console.log(ads)
   })
   .catch(err => console.log(err))
 })

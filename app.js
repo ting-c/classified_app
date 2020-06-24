@@ -17,6 +17,7 @@ app.use(express.urlencoded({ extended: false }));
 
 // static folder
 app.use(express.static(path.join(__dirname, 'public')));
+app.use('/ads', express.static(path.join(__dirname, 'public')));
 
 app.get('/', (req, res) => res.render('index', { layout: 'landing'}));
   
