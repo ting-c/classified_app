@@ -1,4 +1,7 @@
 <div class='container'>
+  {{#if user}}
+    <div class='text-center'>Welcome, {{user.name}}</div>
+  {{/if}}
   <div class='row d-flex justify-content-center'>
     <form action='/ads/search'>
       <input name='term' type='text' placeholder="Looking for..">

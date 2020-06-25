@@ -10,14 +10,13 @@ const addDistanceForAds = ads => {
   ads.forEach(ad => {
     const userLocation = {
       lat: 51.1465,
-      lng: 0.875,
+      lng: 0.875
     };
     const sellerLocation = {
       lat: ad['latitude'],
       lng: ad['longitude']
     };
     const distance = getDistance(userLocation, sellerLocation, true);
-    console.log(userLocation, sellerLocation, distance);
     adsWithDistance.push({ ...ad, distance }); 
   });  
   return adsWithDistance;
@@ -30,56 +29,72 @@ router.get('/', (req, res) =>
     })
     .catch(err => console.log(err)));
 
-router.get('/post', (req, res) => {
-  res.render('post');
-});
+router.get('/post', (req, res) => res.render('post'));
 
 // Post
-router.post('/post', (req, res) => {
-  
-  // Server side validation
-  const fieldsToCheck = ['title', 'description', 'categories', 'price', 'postcode','contact_email'];
-  let errorLog = '';
+router.post("/post", (req, res) => {
+	// Server side validation
+	const fieldsToCheck = [
+		"title",
+		"description",
+		"categories",
+		"price",
+		"postcode",
+		"contact_email"
+	];
+	let errorLog = "";
 
-  // check if field is empty
-  fieldsToCheck.forEach(field => {
-    if (!req.body[field]) { errorLog += field + ', '}
-  });
+	// check if field is empty
+	fieldsToCheck.forEach((field) => {
+		if (!req.body[field]) {
+			errorLog += field + ", ";
+		}
+	});
 
-  const errorMessage = `Please add the following information: ` + errorLog.slice(0, -2);
+	const errorMessage =
+		`Please add the following information: ` + errorLog.slice(0, -2);
 
-  if (!!errorLog) {
+	if (!!errorLog) {
 		res.render("post", {
 			errorMessage,
 			...req.body,
-    });
-    return 
+		});
+		return;
 	}
 
-  // check if postcode is valid
-  axios.get(`https://api.postcodes.io/postcodes/${req.body.postcode}`)
-    .then( response => {
-      const { status } = response;
-      const { postcode, longitude, latitude, admin_ward, admin_county, region } = response.data.result;
-      if (status === 200) {
-        console.log('postcode is valid', response);
-        Advert.create({
+	// check if postcode is valid
+	axios
+		.get(`https://api.postcodes.io/postcodes/${req.body.postcode}`)
+		.then((response) => {
+			const { status } = response;
+			const {
+				postcode,
+				longitude,
+				latitude,
+				admin_ward,
+				admin_county,
+				region,
+			} = response.data.result;
+			if (status === 200) {
+				Advert.create({
 					...req.body,
 					postcode,
 					longitude,
 					latitude,
-					location: `${admin_ward},${admin_county ? ` ${admin_county},` : ''} ${region}`
+					location: `${admin_ward},${
+						admin_county ? ` ${admin_county},` : ""
+					} ${region}`,
 				})
-					.then(res.redirect('/ads'))
+					.then(res.redirect("/ads"))
 					.catch((err) => console.log(err));
-      }
-    })
-    .catch(error => {
-      res.render('post', {
-        errorMessage: 'Invalid postcode',
-        ...req.body
-      });
-    });
+			}
+		})
+		.catch((error) => {
+			res.render("post", {
+				errorMessage: "Invalid postcode",
+				...req.body,
+			});
+		});
 });
 
 // Search
