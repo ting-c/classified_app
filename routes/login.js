@@ -5,12 +5,20 @@ const initializePassport = require('../config/passport');
 
 initializePassport(passport);
 
+const checkNotAuthenticated = (req, res, next) => {
+	if (!req.isAuthenticated()) {
+		return next()
+	}
+
+	res.redirect('/');
+}
+
 // Login
-router.get("/", (req, res) => {
+router.get("/", checkNotAuthenticated, (req, res) => {
 	res.render("login");
 });
 
-router.post("/",
+router.post("/", checkNotAuthenticated,
 	passport.authenticate("local", { 
 		failureRedirect: "/login",
 		failureFlash: true,

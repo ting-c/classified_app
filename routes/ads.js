@@ -22,6 +22,14 @@ const addDistanceForAds = ads => {
   return adsWithDistance;
 }
 
+const checkAuthenticated = (req, res, next) => {
+	if (req.isAuthenticated()) {
+		return next();
+	}
+
+	res.redirect("/login");
+};
+
 router.get('/', (req, res) => 
   Advert.findAll({ raw:true })
     .then(ads => {
@@ -29,10 +37,10 @@ router.get('/', (req, res) =>
     })
     .catch(err => console.log(err)));
 
-router.get('/post', (req, res) => res.render('post'));
+router.get('/post', checkAuthenticated, (req, res) => res.render('post'));
 
 // Post
-router.post("/post", (req, res) => {
+router.post("/post", checkAuthenticated, (req, res) => {
 	// Server side validation
 	const fieldsToCheck = [
 		"title",
@@ -40,7 +48,7 @@ router.post("/post", (req, res) => {
 		"categories",
 		"price",
 		"postcode",
-		"contact_email"
+		"contact_email",
 	];
 	let errorLog = "";
 
@@ -119,5 +127,6 @@ router.get('/search', (req, res) => {
   })
   .catch(err => console.log(err))
 })
+
 
 module.exports = router;
