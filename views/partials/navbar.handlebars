@@ -18,12 +18,21 @@
       <li class='nav-item'>
         <a class='nav-link' href='/ads/post'>Post an advert</a>
       </li>
-      <li class='nav-item'>
-        <a class='nav-link' href='/register'>Create account</a>
-      </li>
-      <li class='nav-item'>
-        <a class='nav-link' href='/login'>Login</a>
-      </li>
+      {{#if user}}
+        <li class='nav-item'>
+          <a class='nav-link' href="javascript: document.getElementById('logout').submit()">
+            Logout
+          </a>
+          <form id='logout' action='/logout?_method=DELETE' method='POST'></form>
+        </li>
+      {{else}}
+        <li class='nav-item'>
+          <a class='nav-link' href='/register'>Create account</a>
+        </li>
+        <li class='nav-item'>
+          <a class='nav-link' href='/login'>Login</a>
+        </li>
+      {{/if}}
     </ul>
   </div>
 </nav>

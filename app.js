@@ -5,6 +5,7 @@ const path = require('path');
 const flash = require('express-flash');
 const session = require('express-session');
 const passport = require('passport');
+const methodOverride = require('method-override');
 
 // Test DB
 db.authenticate()
@@ -13,7 +14,14 @@ db.authenticate()
 
 const app = express();
 
-app.engine('handlebars', exphbs({ defaultLayout: 'main' }));
+const hbs = exphbs.create({
+  defaultLayout: 'main',
+  helpers: { 
+    user: (req, res) => req.user 
+  }
+})
+
+app.engine('handlebars', hbs.engine);
 app.set('view engine', 'handlebars');
 
 app.use(express.urlencoded({ extended: false }));
@@ -25,22 +33,33 @@ app.use(session({
 }));
 app.use(passport.initialize());
 app.use(passport.session());
+app.use(methodOverride('_method'));
 
 // static folder
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/ads', express.static(path.join(__dirname, 'public')));
 
+// middleware function to create a local user variable accessible in the view
+app.use((req, res, next) => {
+  app.locals.user = req.user;
+  next()
+});
+
 app.get('/', (req, res) => {
   res.render('index', { 
     layout: 'landing',
-    user: req.user // user after login
+    // user: req.user // user after login
   });
-  console.log(req.user);
+  // console.log(req.user);
 });
   
 app.use('/ads', require('./routes/ads'));
 app.use('/register', require('./routes/register'));
 app.use('/login', require('./routes/login'));
+app.delete('/logout', (req, res) => {
+  req.logOut();
+  res.redirect('/login');
+})
 
 const PORT = process.env.PORT || 5000;
 
