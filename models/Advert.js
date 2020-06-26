@@ -28,6 +28,9 @@ const Advert = db.define('advert', {
   },
   location: {
     type: Sequelize.STRING
+  },
+  user_id: {
+    type: Sequelize.INTEGER
   }
 });
 

@@ -41,6 +41,7 @@ router.get('/post', checkAuthenticated, (req, res) => res.render('post'));
 
 // Post
 router.post("/post", checkAuthenticated, (req, res) => {
+
 	// Server side validation
 	const fieldsToCheck = [
 		"title",
@@ -83,9 +84,11 @@ router.post("/post", checkAuthenticated, (req, res) => {
 				admin_county,
 				region,
 			} = response.data.result;
+
 			if (status === 200) {
 				Advert.create({
 					...req.body,
+					user_id: req.user.id,
 					postcode,
 					longitude,
 					latitude,
@@ -106,27 +109,43 @@ router.post("/post", checkAuthenticated, (req, res) => {
 });
 
 // Search
-router.get('/search', (req, res) => {
+router.get('/search', async (req, res) => {
   const { term } = req.query;
 
-  Advert.findAll({
-    raw: true,
-    where: { 
-      [Op.or]: {
-        title: { 
-          [Op.iLike]: `%${term}%` 
-        },
-        description: { 
-          [Op.iLike]: `%${term}%` 
-        }
-      }
-    }
-  })
-  .then(ads => {
-    res.render('ads', { ads: addDistanceForAds(ads), term });
-  })
-  .catch(err => console.log(err))
+	try {
+		const ads = await Advert.findAll({
+			raw: true,
+			where: { 
+				[Op.or]: {
+					title: { 
+						[Op.iLike]: `%${term}%` 
+					},
+					description: { 
+						[Op.iLike]: `%${term}%` 
+					}
+				}
+			}
+		});
+		res.render('ads', { ads: addDistanceForAds(ads), term });
+	} catch (err) {
+		console.log(err)
+	}
 })
+
+router.get('/myads', checkAuthenticated, async (req, res) => {
+	try {
+		const ads = await Advert.findAll({
+			raw: true,
+			where: {
+				user_id: req.user.id
+			}
+		}); 
+		res.render('myads', {	ads	});
+	} catch (err) {
+		console.log(err);
+	}
+})
+	
 
 
 module.exports = router;
