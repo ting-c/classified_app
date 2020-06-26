@@ -14,14 +14,7 @@ db.authenticate()
 
 const app = express();
 
-const hbs = exphbs.create({
-  defaultLayout: 'main',
-  helpers: { 
-    user: (req, res) => req.user 
-  }
-})
-
-app.engine('handlebars', hbs.engine);
+app.engine('handlebars', exphbs({ defaultLayout: 'main' }));
 app.set('view engine', 'handlebars');
 
 app.use(express.urlencoded({ extended: false }));
@@ -47,10 +40,8 @@ app.use((req, res, next) => {
 
 app.get('/', (req, res) => {
   res.render('index', { 
-    layout: 'landing',
-    // user: req.user // user after login
+    layout: 'landing'
   });
-  // console.log(req.user);
 });
   
 app.use('/ads', require('./routes/ads'));
