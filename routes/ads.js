@@ -49,9 +49,7 @@ const postAdWithCustomPostcode = async (req, res) => {
 					postcode,
 					longitude,
 					latitude,
-					location: `${admin_ward},${
-						admin_county ? ` ${admin_county},` : ""
-					} ${region}`,
+					location: `${admin_ward}, `||'' + `${admin_county}, `||'' + `${region}, `||''
 				});
 				res.redirect("/ads");
 			} catch (err) {
@@ -152,8 +150,8 @@ router.post("/post", checkAuthenticated, (req, res) => {
 
 // Search
 router.get('/search', async (req, res) => {
-  const { term } = req.query;
-
+	const { term, min_price, max_price, min_distance, max_distance } = req.query;
+	
 	try {
 		const ads = await Advert.findAll({
 			raw: true,
@@ -165,10 +163,36 @@ router.get('/search', async (req, res) => {
 					description: { 
 						[Op.iLike]: `%${term}%` 
 					}
+				},
+				price: {
+					[Op.between]: [ min_price||0 , max_price||100000 ]
 				}
 			}
 		});
-		res.render('ads', { ads: addDistanceForAds(ads), term });
+
+		if ( !req.user && (min_distance || max_distance) ) {
+			res.render('index', {
+				layout: 'landing', 
+				errorMessage: 'Login required before using the distance filter',
+				...req.body
+			});
+			return 
+		}
+
+		if (req.user) {
+			const userLocation = {
+				lat: req.user.latitude,
+				lng: req.user.longitude,
+			};
+			const adswithDistanceFilter = addDistanceForAds(ads, userLocation).filter(
+				(ad) =>
+					(ad.distance > (min_distance || 0) ) && 
+					(ad.distance < (max_distance || 1500) )
+			);
+			res.render('ads', { ads: adswithDistanceFilter, term });
+		} else {
+			res.render("ads", { ads });
+		}
 	} catch (err) {
 		console.log(err)
 	}
@@ -179,7 +203,7 @@ router.get('/myads', checkAuthenticated, async (req, res) => {
 		const ads = await Advert.findAll({
 			raw: true,
 			where: {
-				user_id: req.user.id
+				seller_id: req.user.id
 			}
 		}); 
 		res.render('myads', {	ads	});

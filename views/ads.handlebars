@@ -8,23 +8,34 @@
   </h4>
 
   {{#if user}}
+    {{#if ads}}
     <div class='text-center'>* Distances are calculated from {{user.location}}</div>
+    {{/if}}
   {{/if}}
 
   {{#each ads}}
   <div class='ads card m-3 shadow bg-light'>
     <div class='card-body'>
-      <h5 class='bg-secondary p-2 font-weight-bold'>{{title}}</h5>
+
+      <div class='bg-secondary p-3'>
+        <h5 class='font-weight-bold'>{{title}}</h5>
+      </div>
+
+      <div class='bg-secondary p-3'>
+        <h5>
+          <span class='float-right'>£ {{price}}</span>
+          {{#if distance}}
+            <span>{{distance}} miles</span>
+          {{/if}}
+        </h5>
+      </div>
+
       <div class='bg-light p-2 shadow-sm'>
         <h6 class='font-weight-bold'>Description</h6>
         <p>{{description}}</p>
       </div>
 
       <table class='table table-borderless' style='word-wrap: break-word'>
-        <tr>
-          <td>Price</td>
-          <td>£ {{price}}</td>
-        </tr>
         <tr>
           <td>Categories</td>
           <td>{{categories}}</td>
@@ -33,12 +44,6 @@
           <td>Location</td>
           <td>{{location}}</td>
         </tr>
-        {{#if distance}}
-          <tr>
-            <td>Distance</td>
-            <td>{{distance}} miles</td>
-          </tr>
-        {{/if}}
         <tr>
           <td>Contact Email</td>
           <td style='word-break: break-all'>{{contact_email}}</td>

@@ -1,11 +1,33 @@
 <div class='container'>
   {{#if user}}
-    <div class='text-center'>Welcome, {{user.name}}</div>
+    <div class='text-center m-2 text-capitalize font-italic'>Welcome, {{user.name}}</div>
   {{/if}}
   <div class='row d-flex justify-content-center'>
-    <form action='/ads/search'>
-      <input name='term' type='text' placeholder="Looking for..">
-      <span><button type='submit'>Search</button></span>
+    <form action='/ads/search' class='form'>
+      <div class='form-group d-flex justify-content-center'>
+        <input name='term' class='form-control m-1' type='text' placeholder="Looking for.." value={{term}}>
+        <span><button class='btn btn-primary m-1' type='submit'>Search</button></span>        
+      </div>
+
+    <br>
+      {{#if errorMessage}}
+        <div class='text-center text-warning'>{{errorMessage}}</div>
+      {{/if}}
+    <br>
+
+      <div class='form-group bg-secondary my-3 p-2'>
+      <h5 class='text-center font-weight-bold'>Filters</h5>
+        <label class='font-weight-bold'>Price</label><br>
+        <span><input name='min_price' class='form-control my-1' type='number' min='0' max='100000' placeholder='Min Price' value={{min_price}}></span>
+        <span><input name='max_price' class='form-control my-1' type='number' min='0' max='100000' placeholder='Max Price' value={{max_price}}></span>
+
+      <br>
+
+        <label class='font-weight-bold'>Distance (miles)</label><br>
+        <span><input name='min_distance' class='form-control my-1' type='number' min='0' max='1500' placeholder='Min Distance'></span>
+        <span><input name='max_distance' class='form-control my-1' type='number' min='0' max='1500' placeholder='Max Distance'></span>
+
+      </div>
     </form>
   </div>
 </div>
