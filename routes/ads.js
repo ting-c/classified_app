@@ -5,13 +5,9 @@ const { Op } = require('sequelize');
 const axios = require('axios');
 const getDistance = require('../getDistance');
 
-const addDistanceForAds = ads => {
+const addDistanceForAds = (ads, userLocation) => {
   adsWithDistance = [];
   ads.forEach(ad => {
-    const userLocation = {
-      lat: 51.1465,
-      lng: 0.875
-    };
     const sellerLocation = {
       lat: ad['latitude'],
       lng: ad['longitude']
@@ -33,7 +29,17 @@ const checkAuthenticated = (req, res, next) => {
 router.get('/', (req, res) => 
   Advert.findAll({ raw:true })
     .then(ads => {
-      res.render('ads', { ads: addDistanceForAds(ads) });
+			console.log(req.user);
+			if (req.user) {
+				const userLocation = {
+					lat: req.user.latitude,
+					lng: req.user.longitude
+				}
+				res.render('ads', { ads: addDistanceForAds(ads, userLocation) });
+			} else {
+				res.render("ads", { ads });
+			}
+			
     })
     .catch(err => console.log(err)));
 

@@ -29,10 +29,12 @@
           <td>Location</td>
           <td>{{location}}</td>
         </tr>
-        <tr>
-          <td>Distance</td>
-          <td>{{distance}} miles</td>
-        </tr>
+        {{#if distance}}
+          <tr>
+            <td>Distance</td>
+            <td>{{distance}} miles</td>
+          </tr>
+        {{/if}}
         <tr>
           <td>Contact Email</td>
           <td style='word-break: break-all'>{{contact_email}}</td>
