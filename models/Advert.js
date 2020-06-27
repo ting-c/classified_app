@@ -29,9 +29,12 @@ const Advert = db.define('advert', {
   location: {
     type: Sequelize.STRING
   },
-  user_id: {
+  seller_id: {
     type: Sequelize.INTEGER
-  }
+  },
+  seller_name: {
+    type: Sequelize.INTEGER
+  },
 });
 
 module.exports = Advert;

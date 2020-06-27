@@ -43,7 +43,8 @@ const postAdWithCustomPostcode = async (req, res) => {
 			try {
 				await Advert.create({
 					...req.body,
-					user_id: req.user.id,
+					seller_id: req.user.id,
+					seller_name: req.user.name,
 					contact_email: req.user.email,
 					postcode,
 					longitude,
@@ -79,7 +80,8 @@ const postAdWithRegisterPostcode = async (req, res) => {
 	try {
 		await Advert.create({
 			...req.body,
-			user_id: req.user.id,
+			seller_id: req.user.id,
+			seller_name: req.user.name,
 			contact_email: req.user.email,
 			postcode,
 			longitude,
