@@ -18,7 +18,7 @@ const addDistanceForAds = (ads, userLocation) => {
   return adsWithDistance;
 }
 
-const checkAuthenticated = (req, res, next) => {
+const checkAuthenticated = async (req, res, next) => {
 	if (req.isAuthenticated()) {
 		return next();
 	}
@@ -26,10 +26,78 @@ const checkAuthenticated = (req, res, next) => {
 	res.redirect("/login");
 };
 
+const postAdWithCustomPostcode = async (req, res) => {
+	try {
+		const response = await axios.get(`https://api.postcodes.io/postcodes/${req.body.custom_postcode}`);
+		const { status } = response;
+		const {
+			postcode,
+			longitude,
+			latitude,
+			admin_ward,
+			admin_county,
+			region,
+		} = response.data.result;
+
+		if (status === 200) {
+			try {
+				await Advert.create({
+					...req.body,
+					user_id: req.user.id,
+					contact_email: req.user.email,
+					postcode,
+					longitude,
+					latitude,
+					location: `${admin_ward},${
+						admin_county ? ` ${admin_county},` : ""
+					} ${region}`,
+				});
+				res.redirect("/ads");
+			} catch (err) {
+				res.render("post", {
+				errorMessage: "Failed to post advert",
+				...req.body,
+				});
+			}
+		}
+	} catch (err) {
+		res.render("post", {
+			errorMessage: "Invalid postcode",
+			...req.body,
+		});
+	}
+}
+
+const postAdWithRegisterPostcode = async (req, res) => {
+	const {
+		postcode,
+		longitude,
+		latitude,
+		location
+	} = req.user;
+
+	try {
+		await Advert.create({
+			...req.body,
+			user_id: req.user.id,
+			contact_email: req.user.email,
+			postcode,
+			longitude,
+			latitude,
+			location,
+		});
+		res.redirect('/ads');
+	} catch (err) {
+		res.render("post", {
+			errorMessage: "Failed to post advert",
+			...req.body,
+		});
+	}
+}
+
 router.get('/', (req, res) => 
   Advert.findAll({ raw:true })
     .then(ads => {
-			console.log(req.user);
 			if (req.user) {
 				const userLocation = {
 					lat: req.user.latitude,
@@ -53,9 +121,7 @@ router.post("/post", checkAuthenticated, (req, res) => {
 		"title",
 		"description",
 		"categories",
-		"price",
-		"postcode",
-		"contact_email",
+		"price"
 	];
 	let errorLog = "";
 
@@ -77,41 +143,9 @@ router.post("/post", checkAuthenticated, (req, res) => {
 		return;
 	}
 
-	// check if postcode is valid
-	axios
-		.get(`https://api.postcodes.io/postcodes/${req.body.postcode}`)
-		.then((response) => {
-			const { status } = response;
-			const {
-				postcode,
-				longitude,
-				latitude,
-				admin_ward,
-				admin_county,
-				region,
-			} = response.data.result;
+	req.body.postcode_type === 'register' ? 
+		postAdWithRegisterPostcode(req, res) : postAdWithCustomPostcode(req, res);
 
-			if (status === 200) {
-				Advert.create({
-					...req.body,
-					user_id: req.user.id,
-					postcode,
-					longitude,
-					latitude,
-					location: `${admin_ward},${
-						admin_county ? ` ${admin_county},` : ""
-					} ${region}`,
-				})
-					.then(res.redirect("/ads"))
-					.catch((err) => console.log(err));
-			}
-		})
-		.catch((error) => {
-			res.render("post", {
-				errorMessage: "Invalid postcode",
-				...req.body,
-			});
-		});
 });
 
 // Search
@@ -151,7 +185,5 @@ router.get('/myads', checkAuthenticated, async (req, res) => {
 		console.log(err);
 	}
 })
-	
-
 
 module.exports = router;
