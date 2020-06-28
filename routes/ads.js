@@ -2,121 +2,16 @@ const express = require('express');
 const router = express.Router();
 const Advert = require('../models/Advert');
 const { Op } = require('sequelize');
-const axios = require('axios');
-const getDistance = require('../getDistance');
-
-const addDistanceForAds = (ads, userLocation) => {
-  adsWithDistance = [];
-  ads.forEach(ad => {
-    const sellerLocation = {
-      lat: ad['latitude'],
-      lng: ad['longitude']
-    };
-    const distance = getDistance(userLocation, sellerLocation, true);
-    adsWithDistance.push({ ...ad, distance }); 
-  });  
-  return adsWithDistance;
-}
-
-const checkAuthenticated = async (req, res, next) => {
-	if (req.isAuthenticated()) {
-		return next();
-	}
-
-	res.redirect("/login");
-};
-
-const postAdWithCustomPostcode = async (req, res) => {
-	try {
-		const response = await axios.get(`https://api.postcodes.io/postcodes/${req.body.custom_postcode}`);
-		const { status } = response;
-		const {
-			postcode,
-			longitude,
-			latitude,
-			admin_ward,
-			admin_county,
-			region,
-		} = response.data.result;
-
-		if (status === 200) {
-			try {
-				await Advert.create({
-					...req.body,
-					seller_id: req.user.id,
-					seller_name: req.user.name,
-					contact_email: req.user.email,
-					postcode,
-					longitude,
-					latitude,
-					location: `${admin_ward}, `||'' + `${admin_county}, `||'' + `${region}, `||''
-				});
-				res.redirect("/ads/myads");
-			} catch (err) {
-				res.render("post", {
-				errorMessage: "Failed to post advert",
-				...req.body,
-				});
-			}
-		}
-	} catch (err) {
-		res.render("post", {
-			errorMessage: "Invalid postcode",
-			...req.body,
-		});
-	}
-}
-
-const postAdWithRegisterPostcode = async (req, res) => {
-	const {
-		postcode,
-		longitude,
-		latitude,
-		location
-	} = req.user;
-
-	try {
-		await Advert.create({
-			...req.body,
-			seller_id: req.user.id,
-			seller_name: req.user.name,
-			contact_email: req.user.email,
-			postcode,
-			longitude,
-			latitude,
-			location,
-		});
-		res.redirect('/ads/myads');
-	} catch (err) {
-		res.render("post", {
-			errorMessage: "Failed to post advert",
-			...req.body,
-		});
-	}
-}
-
-const sortByPrice = (sort_by) => {
-	switch (sort_by) {
-		case "price_desc":
-			return [["price", "DESC"]];
-		case "price_desc":
-			return [["price", "DESC"]];
-		default:
-			return null;
-	}
-};
-
-const sortAdsByDistance = (sort_by, ads) => {
-	switch (sort_by) {
-		case "distance_asc":
-			return ads.sort( (a, b) => parseFloat(a.distance) - parseFloat(b.distance) )
-		case "distance_desc":
-			return ads.sort( (a, b) => parseFloat(b.distance) - parseFloat(a.distance) )
-		default:
-			null;
-	};
-};
-
+const { 
+	addDistanceForAds, 
+	checkAuthenticated, 
+	postAdWithCustomPostcode, 
+	postAdWithRegisterPostcode, 
+	sortByPrice, 
+	sortAdsByDistance,
+	updateAdvert,
+	deleteAdvert 
+} = require('../utils');
 
 router.get('/', (req, res) => 
   Advert.findAll({ raw:true })
@@ -293,13 +188,7 @@ router.post('/save', checkAuthenticated, async (req, res) => {
 
 		// update fields except id 
 		const { id, ...fieldsToUpdate } = req.body
-		try {
-			await ad.update({...fieldsToUpdate})
-			res.render("edit_ads", { successMessage: "Changes saved successfully", ...req.body })
-		} catch (err) {
-			console.log(err);
-			res.render("edit_ads", { errorMessage: "Failed to save changes", ...req.body });
-		}
+		updateAdvert(req, res, ad, fieldsToUpdate);
 		return
 	} catch (err) {
 		res.render('edit_ads', { errorMessage: 'Failed to connect to database'})
@@ -319,21 +208,12 @@ router.post('/delete', checkAuthenticated, async (req, res) => {
 		};
 
 		if (!ad) { res.render('edit_ads', { errorMessage: 'Advert not found'}); return };	
-		
-		// delete ad
-		try {
-			ad.destroy();
-			res.redirect("/ads/myads");
-		} catch (err) {
-			console.log(err);
-			res.render('edit_ads', { errorMessage: 'Failed to delete'}); 
-		}	
-	
+
+		deleteAdvert(res, ad);	
 	} catch {
 		res.render("edit_ads", { errorMessage: "Failed to connect to database" });
 		return; 
 	}
-		
 })
 
 module.exports = router;
