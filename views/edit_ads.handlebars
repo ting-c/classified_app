@@ -27,10 +27,11 @@
   </form>
 
   <div class='row'>
-    <button class='btn btn-primary'><a class='text-white' href='/ads/myads'>Back</a></button>
+    <form action='/ads/myads'>
+      <button class='btn btn-primary text-white' type='submit'>Back</button>
+    </form>
   </div>
   
-
   <div class='text-success text-center'>
     {{#if successMessage}}
       {{successMessage}}

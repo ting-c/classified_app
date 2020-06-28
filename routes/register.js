@@ -24,6 +24,7 @@ router.post("/", checkNotAuthenticated, async (req, res) => {
 		"name",
 		"email",
 		"password",
+		"confirm_password",
 		"postcode"
 	];
 	let errorLog = "";
@@ -34,6 +35,12 @@ router.post("/", checkNotAuthenticated, async (req, res) => {
 			errorLog += field + ", ";
 		}
 	});
+
+	// check if passwords are identical
+	if (req.body.password !== req.body.confirm_password) {
+		res.render("register", { errorMessage: 'Please enter the same passwords' });
+		return
+	}
 
 	const errorMessage =
 		`Please add the following information: ` + errorLog.slice(0, -2);
