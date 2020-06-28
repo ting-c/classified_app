@@ -1,0 +1,46 @@
+<div class='container d-flex flex-column justify-contents-center'> 
+  
+  <h4 class='text-center m-3'>Edit advert</h4>
+
+  <form action='/ads/save' method='POST' class='row d-flex flex-column align-items-center p-2 font-weight-bold'>
+    <input name="id" type="hidden" value={{id}}>
+
+    <label>Title</label>
+    <input name="title" class="form-control" type='text' value="{{title}}">
+  <br>
+    <label>Description</label>
+    <textarea name="description" class="form-control" rows="8">{{description}}</textarea>
+  <br>
+    <label>Price</label>
+    <input name="price" class="form-control" type='number' min='0' max='100000' step='0.01' value="{{price}}">
+  <br>
+    <label>Categories</label>
+    <input name="categories" class="form-control" type='text' value="{{categories}}">
+  <br>
+    <button type="submit" class="btn btn-success" style='width: 7rem'>Save</button>
+
+  </form>
+
+  <form action='/ads/delete' method='POST' class='row d-flex flex-column align-items-center'>
+    <input name="id" type="hidden" value={{id}}>
+    <button type='submit' class='btn btn-warning m-3' style='width: 7rem'>Delete</button>
+  </form>
+
+  <div class='row'>
+    <button class='btn btn-primary'><a class='text-white' href='/ads/myads'>Back</a></button>
+  </div>
+  
+
+  <div class='text-success text-center'>
+    {{#if successMessage}}
+      {{successMessage}}
+    {{/if}}
+  </div>
+  
+  <div class='text-danger text-center'>
+    {{#if errorMessage}}
+      {{errorMessage}}
+    {{/if}}
+  </div>
+
+</div>

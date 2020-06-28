@@ -2,44 +2,57 @@
   <h4 class='text-center m-3'>
     My adverts
   </h4>
+  
+  <div class='text-danger'>
+    {{#if errorMessage}}
+      {{errorMessage}}
+    {{/if}}
+  </div>
 
   {{#each ads}}
-  <div class='ads card m-3 shadow bg-light'>
-    <div class='card-body'>
-      <h5 class='bg-secondary p-2 font-weight-bold'>{{title}}</h5>
-      <div class='bg-light p-2 shadow-sm'>
-        <h6 class='font-weight-bold'>Description</h6>
-        <p>{{description}}</p>
-      </div>
+    <div class='ads card m-3 shadow bg-light'>
 
-      <table class='table table-borderless' style='word-wrap: break-word'>
-        <tr>
-          <td>Price</td>
-          <td>£ {{price}}</td>
-        </tr>
-        <tr>
-          <td>Categories</td>
-          <td>{{categories}}</td>
-        </tr>
-        <tr>
-          <td>Location</td>
-          <td>{{location}}</td>
-        </tr>
-        <tr>
-          <td>Contact Email</td>
-          <td style='word-break: break-all'>{{contact_email}}</td>
-        </tr>
-        <tr>
-          <td>Posted at</td>
-          <td>{{createdAt}}</td>
-        </tr>
-        <tr>
-          <td>Updated at</td>
-          <td>{{updatedAt}}</td>
-        </tr>
-      </table>      
+      <div class='card-body'>
+        <h5 class='bg-secondary p-2 font-weight-bold'>{{title}}
+          <span class='float-right'>£ {{price}}</span>
+        </h5>
+        <div class='bg-light p-2 shadow-sm'>
+          <h6 class='font-weight-bold'>Description</h6>
+          <p>{{description}}</p>
+        </div>
+
+        <table class='table table-borderless' style='word-wrap: break-word'>
+          <tr>
+            <td>Categories</td>
+            <td>{{categories}}</td>
+          </tr>
+          <tr>
+            <td>Location</td>
+            <td>{{location}}</td>
+          </tr>
+          <tr>
+            <td>Contact Email</td>
+            <td style='word-break: break-all'>{{contact_email}}</td>
+          </tr>
+          <tr>
+            <td>Posted at</td>
+            <td>{{createdAt}}</td>
+          </tr>
+          <tr>
+            <td>Updated at</td>
+            <td>{{updatedAt}}</td>
+          </tr>
+        </table>      
+    
+        <form class='text-center' action='/ads/edit' method='POST'>
+          <input name='id' id='id' type='hidden' value={{id}}>
+          <button class='btn btn-info text-center text-white' type='submit' style='width: 40%'>
+            Edit
+          </button>
+        </form>
+
+      </div>    
     </div>
-  </div>
   {{else}}
     <p>No adverts posted</p>
   {{/each}}

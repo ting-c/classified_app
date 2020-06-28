@@ -51,7 +51,7 @@ const postAdWithCustomPostcode = async (req, res) => {
 					latitude,
 					location: `${admin_ward}, `||'' + `${admin_county}, `||'' + `${region}, `||''
 				});
-				res.redirect("/ads");
+				res.redirect("/ads/myads");
 			} catch (err) {
 				res.render("post", {
 				errorMessage: "Failed to post advert",
@@ -86,7 +86,7 @@ const postAdWithRegisterPostcode = async (req, res) => {
 			latitude,
 			location,
 		});
-		res.redirect('/ads');
+		res.redirect('/ads/myads');
 	} catch (err) {
 		res.render("post", {
 			errorMessage: "Failed to post advert",
@@ -204,12 +204,92 @@ router.get('/myads', checkAuthenticated, async (req, res) => {
 			raw: true,
 			where: {
 				seller_id: req.user.id
-			}
+			},
+			order: [
+				['updatedAt', 'DESC'],
+				['createdAt', 'DESC']
+			]
 		}); 
 		res.render('myads', {	ads	});
 	} catch (err) {
 		console.log(err);
 	}
+})
+
+router.post('/edit', checkAuthenticated, async (req, res) => {
+	const { id } = req.body;
+	
+	try {
+		const ad = await Advert.findByPk(id, { raw: true });
+
+		// check if user is the owner of the advert
+		if (ad.seller_id !== req.user.id) { 
+			res.render('myads', { errorMessage: 'Unauthorized Access'});
+			return 
+		};
+		res.render('edit_ads', { ...ad });
+	} catch (err) {
+		console.log(err);
+	}
+
+})
+
+router.post('/save', checkAuthenticated, async (req, res) => {
+
+	// find advert by id
+	try {
+		const ad = await Advert.findByPk(req.body.id);
+
+		// check if user is the owner of the advert
+		if (ad.dataValues.seller_id !== req.user.id) { 
+			res.render('index', { errorMessage: 'Unauthorized Access'})
+		};
+
+		if (!ad) { res.render('edit_ads', { errorMessage: 'Advert not found'}); return };
+
+		// update fields except id 
+		const { id, ...fieldsToUpdate } = req.body
+		try {
+			await ad.update({...fieldsToUpdate})
+			res.render("edit_ads", { successMessage: "Changes saved successfully", ...req.body })
+		} catch (err) {
+			console.log(err);
+			res.render("edit_ads", { errorMessage: "Failed to save changes", ...req.body });
+		}
+		return
+	} catch (err) {
+		res.render('edit_ads', { errorMessage: 'Failed to connect to database'})
+		console.log(err);
+	}
+})
+
+router.post('/delete', checkAuthenticated, async (req, res) => {
+
+	// find advert by id
+	try {
+		const ad = await Advert.findByPk(req.body.id);
+		
+		// check if user is the owner of the advert
+		if (ad.dataValues.seller_id !== req.user.id) { 
+			res.render('index', { errorMessage: 'Unauthorized Access'})
+		};
+
+		if (!ad) { res.render('edit_ads', { errorMessage: 'Advert not found'}); return };	
+		
+		// delete ad
+		try {
+			ad.destroy();
+			res.redirect("/ads/myads");
+		} catch (err) {
+			console.log(err);
+			res.render('edit_ads', { errorMessage: 'Failed to delete'}); 
+		}	
+	
+	} catch {
+		res.render("edit_ads", { errorMessage: "Failed to connect to database" });
+		return; 
+	}
+		
 })
 
 module.exports = router;
