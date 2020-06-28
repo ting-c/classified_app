@@ -95,6 +95,29 @@ const postAdWithRegisterPostcode = async (req, res) => {
 	}
 }
 
+const sortByPrice = (sort_by) => {
+	switch (sort_by) {
+		case "price_desc":
+			return [["price", "DESC"]];
+		case "price_desc":
+			return [["price", "DESC"]];
+		default:
+			return null;
+	}
+};
+
+const sortAdsByDistance = (sort_by, ads) => {
+	switch (sort_by) {
+		case "distance_asc":
+			return ads.sort( (a, b) => parseFloat(a.distance) - parseFloat(b.distance) )
+		case "distance_desc":
+			return ads.sort( (a, b) => parseFloat(b.distance) - parseFloat(a.distance) )
+		default:
+			null;
+	};
+};
+
+
 router.get('/', (req, res) => 
   Advert.findAll({ raw:true })
     .then(ads => {
@@ -150,31 +173,38 @@ router.post("/post", checkAuthenticated, (req, res) => {
 
 // Search
 router.get('/search', async (req, res) => {
-	const { term, min_price, max_price, min_distance, max_distance } = req.query;
-	
+	const { term, min_price, max_price, min_distance, max_distance, sort_by } = req.query;
+
+	// check if user is login when distance sort is used
+	if (!req.user && (sort_by === 'distance_desc' || sort_by === 'distance_asc')) {
+		res.render('ads', { errorMessage: 'Please login before using distance sort'})
+		return
+	}
+
 	try {
 		const ads = await Advert.findAll({
 			raw: true,
-			where: { 
+			where: {
 				[Op.or]: {
-					title: { 
-						[Op.iLike]: `%${term}%` 
+					title: {
+						[Op.iLike]: `%${term}%`,
 					},
-					description: { 
-						[Op.iLike]: `%${term}%` 
-					}
+					description: {
+						[Op.iLike]: `%${term}%`,
+					},
 				},
 				price: {
-					[Op.between]: [ min_price||0 , max_price||100000 ]
-				}
-			}
+					[Op.between]: [min_price || 0, max_price || 100000],
+				},
+			},
+			order: sortByPrice(sort_by),
 		});
 
 		if ( !req.user && (min_distance || max_distance) ) {
 			res.render('index', {
 				layout: 'landing', 
 				errorMessage: 'Login required before using the distance filter',
-				...req.body
+				...req.query
 			});
 			return 
 		}
@@ -189,12 +219,26 @@ router.get('/search', async (req, res) => {
 					(ad.distance > (min_distance || 0) ) && 
 					(ad.distance < (max_distance || 1500) )
 			);
+
+			// render ads view with sort
+			if ((sort_by === 'distance_desc') || (sort_by === 'distance_asc')) {
+				const adsSortedByDistance = sortAdsByDistance(sort_by, adswithDistanceFilter);	
+				res.render('ads', { ads: adsSortedByDistance, term });
+				return;
+			};
+
+			// render ads view without sort 
 			res.render('ads', { ads: adswithDistanceFilter, term });
-		} else {
-			res.render("ads", { ads });
-		}
+			return 
+
+		}; 
+
+		// render ads view without sort / filter
+		res.render("ads", { ads, term });
+
 	} catch (err) {
-		console.log(err)
+		console.log(err);
+		res.render('ads', { term, errorMessage: 'Failed to connect to database' });
 	}
 })
 

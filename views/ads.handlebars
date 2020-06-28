@@ -7,18 +7,45 @@
     {{/if}}
   </h4>
 
-  {{#if user}}
-    {{#if ads}}
-    <div class='text-center'>* Distances are calculated from {{user.location}}</div>
-    {{/if}}
-  {{/if}}
+  <div class='row'>
+    <div class="float-right btn-group mx-1 ">
+      <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        Sort
+      </button>
+      <div class="dropdown-menu bg-light">
+        <form action='/ads/search'>
+          <input name="term" type="hidden" value={{term}}>
+          <button name="sort_by" value='price_desc' class="dropdown-item py-2 text-capitalize" type="submit" style='color: black'>
+            Price (Descending)
+          </button>
+          <button name="sort_by" value='price_asc' class="dropdown-item py-2 text-capitalize" type="submit" style='color: black'>
+            Price (Ascending)
+          </button>
+          {{#if user}}
+            <button name="sort_by" value='distance_desc' class="dropdown-item py-2 text-capitalize" type="submit" style='color: black'>
+              Distance (Descending)
+            </button>
+            <button name="sort_by" value='distance_asc' class="dropdown-item py-2 text-capitalize" type="submit" style='color: black'>
+              Distance (Ascending)
+            </button>
+          {{/if}}
+        </form>
+      </div>
+
+      {{#if user}}
+        {{#if ads}}
+        <div class='m-1 text-muted text-center font-italic'>* Distances are calculated from {{user.location}}</div>
+        {{/if}}
+      {{/if}}
+    </div>
+  </div>
 
   {{#each ads}}
   <div class='ads card m-3 shadow bg-light'>
     <div class='card-body'>
 
       <div class='bg-secondary p-3'>
-        <h5 class='font-weight-bold'>{{title}}</h5>
+        <h5 class='font-weight-bold text-capitalize'>{{title}}</h5>
       </div>
 
       <div class='bg-secondary p-3'>
@@ -38,7 +65,7 @@
       <table class='table table-borderless' style='word-wrap: break-word'>
         <tr>
           <td>Categories</td>
-          <td>{{categories}}</td>
+          <td class='text-capitalize'>{{categories}}</td>
         </tr>
         <tr>
           <td>Location</td>
@@ -50,17 +77,22 @@
         </tr>
         <tr>
           <td>Seller name</td>
-          <td class-'text-capitalize'>{{seller_name}}</td>
+          <td class='text-capitalize'>{{seller_name}}</td>
         </tr>
         <tr>
           <td>Posted at</td>
           <td>{{createdAt}}</td>
         </tr>
       </table>      
+    
     </div>
   </div>
   {{else}}
-    <p>No adverts posted</p>
+    {{#if errorMessage}}
+      <div class='row text-center text-danger'>{{errorMessage}}</div>
+      {{else}}
+      <div class='row d-flex justify-content-center text-muted'><p>No adverts found</p></div>
+    {{/if}}
   {{/each}}
 </div>
 
