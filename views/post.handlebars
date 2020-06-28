@@ -2,7 +2,7 @@
 
   <h3 class='text-center m-3'>Post an advert</h3>
   <h4 class='text-center p-1' style='color:red'>{{errorMessage}}</h4>
-  <div class='ads row m-2 d-flex justify-content-center'>
+  <div class='ads row m-2 d-flex flex-column'>
     <form action='/ads/post' method='POST'>
       <div class="form-group">        
         <label for="title">Title</label>
@@ -41,7 +41,12 @@
         </div>   
       </div>
 
-      <button type="submit" class="btn btn-primary">Post</button>
+    <div class='row d-flex justify-content-center'>
+      <button type="submit" class="btn btn-primary text-center" style='width: 7rem'>
+        Post
+      </button>
+    </div>
+    
     </form>
   </div>
 
