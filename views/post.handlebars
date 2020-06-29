@@ -6,18 +6,18 @@
     <form action='/ads/post' method='POST'>
       <div class="form-group">        
         <label for="title">Title</label>
-        <input name='title' type="text" class="form-control" id="title" required value={{title}} >
+        <input name='title' type="text" class="form-control" id="title" required value="{{title}}" >
       </div>
 
       <div class="form-group">        
         <label for="description">Description</label>
-        <textarea name='description'  class="form-control" id="description" rows='3' required value={{description}} ></textarea>
+        <textarea name='description'  class="form-control" id="description" rows='3' required>{{description}}</textarea>
         <small class="form-text text-muted">Try to describe your item in detail</small>
       </div>
 
       <div class="form-group">        
         <label for="categories">Categories</label>
-        <input name='categories' type="text" class="form-control" id="categories" required value={{categories}} >
+        <input name='categories' type="text" class="form-control" id="categories" required value="{{categories}}" >
         <small class="form-text text-muted">E.g. accessories, sports, games</small>
       </div>
 

@@ -1,5 +1,6 @@
 const axios = require("axios");
 const Advert = require("./models/Advert");
+const { Op } = require("sequelize");
 
 // Haversine formula
 const getDistance = (p1, p2, isInMiles) => {
@@ -39,77 +40,71 @@ exports.checkAuthenticated = (req, res, next) => {
 	res.redirect("/login");
 };
 
-exports.postAdWithCustomPostcode = async (req, res) => {
-	try {
-		const response = await axios.get(
-			`https://api.postcodes.io/postcodes/${req.body.custom_postcode}`
-		);
-		const { status } = response;
-		const {
-			postcode,
-			longitude,
-			latitude,
-			admin_ward,
-			admin_county,
-			region,
-		} = response.data.result;
+exports.getLocationDetails = async (postcode) => {
+ try {
+		return await axios.get(
+			`https://api.postcodes.io/postcodes/${postcode}`
+    );
+  } catch (err) {
+		return null
+	} 
+}
 
-		if (status === 200) {
-			try {
-				await Advert.create({
-					...req.body,
-					seller_id: req.user.id,
-					seller_name: req.user.name,
-					contact_email: req.user.email,
-					postcode,
-					longitude,
-					latitude,
-					location:
-						`${admin_ward}, ` ||
-						"" + `${admin_county}, ` ||
-						"" + `${region}, ` ||
-						"",
-				});
-				res.redirect("/ads/myads");
-			} catch (err) {
-				res.render("post", {
-					errorMessage: "Failed to post advert",
-					...req.body,
-				});
-			}
-		}
-	} catch (err) {
-		res.render("post", {
-			errorMessage: "Invalid postcode",
-			...req.body,
-		});
-	}
+exports.postAdWithCustomPostcode = async (user, body, response) => {
+  const { status } = response;
+  const {
+    postcode,
+    longitude,
+    latitude,
+    admin_ward,
+    admin_county,
+    region,
+  } = response.data.result;
+
+  if (status === 200) {
+    try {
+      await Advert.create({
+        ...body,
+        seller_id: user.id,
+        seller_name: user.name,
+        contact_email: user.email,
+        postcode,
+        longitude,
+        latitude,
+        location:
+          `${admin_ward}, ` ||
+          "" + `${admin_county}, ` ||
+          "" + `${region}, ` ||
+          "",
+      });
+      return true;
+    } catch (err) {
+      return false
+    }
+  }
 };
 
-exports.postAdWithRegisterPostcode = async (req, res) => {
-	const { postcode, longitude, latitude, location } = req.user;
+exports.postAdWithRegisterPostcode = async (user, body) => {
+	const { postcode, longitude, latitude, location } = user;
 
 	try {
 		await Advert.create({
-			...req.body,
-			seller_id: req.user.id,
-			seller_name: req.user.name,
-			contact_email: req.user.email,
+			...body,
+			seller_id: user.id,
+			seller_name: user.name,
+			contact_email: user.email,
 			postcode,
 			longitude,
 			latitude,
 			location,
 		});
-		res.redirect("/ads/myads");
+		return true
 	} catch (err) {
-		res.render("post", {
-			errorMessage: "Failed to post advert",
-			...req.body,
-		});
+    return false
 	}
 };
 
-exports.sortByPrice = (sort_by) => {
+const orderParams = (sort_by) => {
 	switch (sort_by) {
 		case "price_desc":
 			return [["price", "DESC"]];
@@ -131,22 +126,33 @@ exports.sortAdsByDistance = (sort_by, ads) => {
 	};
 };
 
-exports.updateAdvert = async (req, res, ad, fieldsToUpdate) => {
+exports.updateAdvertIsSuccessful = async (ad, fieldsToUpdate) => {
   try {
     await ad.update({...fieldsToUpdate})
-    res.render("edit_ads", { successMessage: "Changes saved successfully", ...req.body })
+    return true
   } catch (err) {
-    console.log(err);
-    res.render("edit_ads", { errorMessage: "Failed to save changes", ...req.body });
+    return false
   }		
 };
 
-exports.deleteAdvert = (res, ad) => {
-  try {
-    ad.destroy();
-    res.redirect("/ads/myads");
-  } catch (err) {
-    console.log(err);
-    res.render("edit_ads", { errorMessage: "Failed to delete" });
-  }
+exports.getAdsFromDbWithPriceParams = async (term, min_price, max_price, sort_by) => {
+
+  const ads = await Advert.findAll({
+    raw: true,
+    where: {
+      [Op.or]: {
+        title: {
+          [Op.iLike]: `%${term}%`,
+        },
+        description: {
+          [Op.iLike]: `%${term}%`,
+        },
+      },
+      price: {
+        [Op.between]: [min_price || 0, max_price || 100000],
+      },
+    },
+    order: orderParams(sort_by),
+  });
+  return ads;
 };

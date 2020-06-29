@@ -1,17 +1,18 @@
 const express = require('express');
 const router = express.Router();
 const Advert = require('../models/Advert');
-const { Op } = require('sequelize');
-const { 
-	addDistanceForAds, 
-	checkAuthenticated, 
-	postAdWithCustomPostcode, 
-	postAdWithRegisterPostcode, 
-	sortByPrice, 
+const {
+	addDistanceForAds,
+	checkAuthenticated,
+	postAdWithCustomPostcode,
+	postAdWithRegisterPostcode,
 	sortAdsByDistance,
-	updateAdvert,
-	deleteAdvert 
-} = require('../utils');
+	updateAdvertIsSuccessful,
+	getAdsFromDbWithPriceParams,
+	getLocationDetails
+} = require("../utils");
+
+
 
 router.get('/', (req, res) => 
   Advert.findAll({ raw:true })
@@ -32,7 +33,7 @@ router.get('/', (req, res) =>
 router.get('/post', checkAuthenticated, (req, res) => res.render('post'));
 
 // Post
-router.post("/post", checkAuthenticated, (req, res) => {
+router.post("/post", checkAuthenticated, async (req, res) => {
 
 	// Server side validation
 	const fieldsToCheck = [
@@ -52,17 +53,38 @@ router.post("/post", checkAuthenticated, (req, res) => {
 
 	const errorMessage =
 		`Please add the following information: ` + errorLog.slice(0, -2);
-
+		
 	if (!!errorLog) {
-		res.render("post", {
-			errorMessage,
-			...req.body,
-		});
+		res.render("post", { errorMessage, ...req.body });
 		return;
 	}
 
-	req.body.postcode_type === 'register' ? 
-		postAdWithRegisterPostcode(req, res) : postAdWithCustomPostcode(req, res);
+	const { user, body } = req;
+	const { postcode_type, custom_postcode } = req.body
+
+	let isSuccessful;
+	if (postcode_type === "register") {
+		isSuccessful = postAdWithRegisterPostcode(user, body);
+	} else {
+		const response = await getLocationDetails(custom_postcode);
+		if (!response) { 
+			res.render('post', { 
+				errorMessage: 'Invalid Postcode', 
+				...req.body
+			});
+			return
+		}
+		isSuccessful = postAdWithCustomPostcode(user, body, response);
+	}
+
+	if (isSuccessful) {
+		res.redirect("/ads/myads");
+	} else {
+		res.render("post", {
+			errorMessage: "Failed to post advert",
+			...req.body,
+		});
+	}
 
 });
 
@@ -76,70 +98,56 @@ router.get('/search', async (req, res) => {
 		return
 	}
 
+	let ads;
 	try {
-		const ads = await Advert.findAll({
-			raw: true,
-			where: {
-				[Op.or]: {
-					title: {
-						[Op.iLike]: `%${term}%`,
-					},
-					description: {
-						[Op.iLike]: `%${term}%`,
-					},
-				},
-				price: {
-					[Op.between]: [min_price || 0, max_price || 100000],
-				},
-			},
-			order: sortByPrice(sort_by),
-		});
-
-		if ( !req.user && (min_distance || max_distance) ) {
-			res.render('index', {
-				layout: 'landing', 
-				errorMessage: 'Login required before using the distance filter',
-				...req.query
-			});
-			return 
-		}
-
-		if (req.user) {
-			const userLocation = {
-				lat: req.user.latitude,
-				lng: req.user.longitude,
-			};
-			const adswithDistanceFilter = addDistanceForAds(ads, userLocation).filter(
-				(ad) =>
-					(ad.distance > (min_distance || 0) ) && 
-					(ad.distance < (max_distance || 1500) )
-			);
-
-			// render ads view with sort
-			if ((sort_by === 'distance_desc') || (sort_by === 'distance_asc')) {
-				const adsSortedByDistance = sortAdsByDistance(sort_by, adswithDistanceFilter);	
-				res.render('ads', { ads: adsSortedByDistance, term });
-				return;
-			};
-
-			// render ads view without sort 
-			res.render('ads', { ads: adswithDistanceFilter, term });
-			return 
-
-		}; 
-
-		// render ads view without sort / filter
-		res.render("ads", { ads, term });
-
+		ads = await getAdsFromDbWithPriceParams(term, min_price, max_price, sort_by);
 	} catch (err) {
-		console.log(err);
-		res.render('ads', { term, errorMessage: 'Failed to connect to database' });
+		console.log(err)
+		res.render("ads", { term, errorMessage: "Failed to connect to database" });
+		return 
 	}
+
+	if ( !req.user && (min_distance || max_distance) ) {
+		res.render('index', {
+			layout: 'landing', 
+			errorMessage: 'Login required before using the distance filter',
+			...req.query
+		});
+		return 
+	}
+
+	if (req.user) {
+		const userLocation = {
+			lat: req.user.latitude,
+			lng: req.user.longitude,
+		};
+		const adswithDistanceFilter = addDistanceForAds(ads, userLocation).filter(
+			(ad) =>
+				(ad.distance > (min_distance || 0) ) && 
+				(ad.distance < (max_distance || 1500) )
+		);
+
+		// render ads view with sort
+		if ((sort_by === 'distance_desc') || (sort_by === 'distance_asc')) {
+			const adsSortedByDistance = sortAdsByDistance(sort_by, adswithDistanceFilter);	
+			res.render('ads', { ads: adsSortedByDistance, term });
+			return;
+		};
+
+		// render ads view without sort 
+		res.render('ads', { ads: adswithDistanceFilter, term });
+
+	}; 
+
+	// render ads view without sort / filter
+	res.render("ads", { ads, term });
+	return 
 })
 
 router.get('/myads', checkAuthenticated, async (req, res) => {
+	let ads;
 	try {
-		const ads = await Advert.findAll({
+		ads = await Advert.findAll({
 			raw: true,
 			where: {
 				seller_id: req.user.id
@@ -149,10 +157,10 @@ router.get('/myads', checkAuthenticated, async (req, res) => {
 				['createdAt', 'DESC']
 			]
 		}); 
-		res.render('myads', {	ads	});
 	} catch (err) {
-		console.log(err);
+		res.render('myads', { errorMessage: 'Failed to connect to database'});
 	}
+	res.render('myads', {	ads	});
 })
 
 router.post('/edit', checkAuthenticated, async (req, res) => {
@@ -175,45 +183,68 @@ router.post('/edit', checkAuthenticated, async (req, res) => {
 
 router.post('/save', checkAuthenticated, async (req, res) => {
 
-	// find advert by id
+	// find advert by id (primary key)
+	let ad;
 	try {
-		const ad = await Advert.findByPk(req.body.id);
-
-		// check if user is the owner of the advert
-		if (ad.dataValues.seller_id !== req.user.id) { 
-			res.render('index', { errorMessage: 'Unauthorized Access'})
-		};
-
-		if (!ad) { res.render('edit_ads', { errorMessage: 'Advert not found'}); return };
-
-		// update fields except id 
-		const { id, ...fieldsToUpdate } = req.body
-		updateAdvert(req, res, ad, fieldsToUpdate);
-		return
+		ad = await Advert.findByPk(req.body.id);
 	} catch (err) {
-		res.render('edit_ads', { errorMessage: 'Failed to connect to database'})
-		console.log(err);
+		res.render('edit_ads', { errorMessage: 'Failed to connect to database'});
 	}
+	
+	// display error message if advert doesn't exist in db
+	if (!ad) { res.render('edit_ads', { errorMessage: 'Advert not found'}); return };
+
+	// check if user is the owner of the advert
+	if (ad.dataValues.seller_id !== req.user.id) { 
+		res.render('index', { errorMessage: 'Unauthorized Access'});
+		return
+	};
+
+	// update fields except id 
+	const { id, ...fieldsToUpdate } = req.body
+	
+	if (updateAdvertIsSuccessful(ad, fieldsToUpdate)) {
+		res.render("edit_ads", {
+			successMessage: "Changes saved successfully",
+			...req.body,
+		});
+	} else {
+		res.render("edit_ads", {
+			errorMessage: "Failed to save changes",
+			...req.body,
+		});
+	};
+
 })
 
 router.post('/delete', checkAuthenticated, async (req, res) => {
 
-	// find advert by id
+	// find advert by id (primary key)
+	let ad;
 	try {
-		const ad = await Advert.findByPk(req.body.id);
-		
-		// check if user is the owner of the advert
-		if (ad.dataValues.seller_id !== req.user.id) { 
-			res.render('index', { errorMessage: 'Unauthorized Access'})
-		};
-
-		if (!ad) { res.render('edit_ads', { errorMessage: 'Advert not found'}); return };	
-
-		deleteAdvert(res, ad);	
-	} catch {
+		ad = await Advert.findByPk(req.body.id);
+	} catch (err) {
 		res.render("edit_ads", { errorMessage: "Failed to connect to database" });
 		return; 
+	};
+	
+	// display error message if advert doesn't exist in db
+	if (!ad) { res.render('edit_ads', { errorMessage: 'Advert not found'}); return };	
+	
+	// check if user is the owner of the advert
+	if (ad.dataValues.seller_id !== req.user.id) { 
+		res.render('index', { errorMessage: 'Unauthorized Access'});
+	};
+
+	// delete ad
+	try {
+		ad.destroy();
+		res.redirect("/ads/myads");
+	} catch (err) {
+		res.render("edit_ads", { errorMessage: "Failed to delete" });
+		return 
 	}
+	
 })
 
 module.exports = router;

@@ -44,6 +44,8 @@
   <div class='ads card m-3 shadow bg-light'>
     <div class='card-body'>
 
+      <img class="card-img-top" src="https://i.ibb.co/8Mvdkrk/apple-watch.jpg" alt="Card image cap">
+
       <div class='bg-secondary p-3'>
         <h5 class='font-weight-bold text-capitalize'>{{title}}</h5>
       </div>
@@ -89,7 +91,7 @@
   </div>
   {{else}}
     {{#if errorMessage}}
-      <div class='row text-center text-danger'>{{errorMessage}}</div>
+      <div class='row d-flex justify-content-center text-danger'>{{errorMessage}}</div>
       {{else}}
       <div class='row d-flex justify-content-center text-muted'><p>No adverts found</p></div>
     {{/if}}
