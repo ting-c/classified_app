@@ -1,5 +1,6 @@
 const axios = require("axios");
 const Advert = require("./models/Advert");
+const Image = require("./models/Image");
 const { Op } = require("sequelize");
 
 // Haversine formula
@@ -146,7 +147,7 @@ exports.getAdsFromDbWithPriceParams = async (term, min_price, max_price, sort_by
         },
         description: {
           [Op.iLike]: `%${term}%`,
-        },
+        }
       },
       price: {
         [Op.between]: [min_price || 0, max_price || 100000],
@@ -156,3 +157,25 @@ exports.getAdsFromDbWithPriceParams = async (term, min_price, max_price, sort_by
   });
   return ads;
 };
+
+getImgUrl = async (advert_id) => {
+  try {
+    const image = await Image.findOne({
+      raw: true,
+      where: { advert_id }
+    });
+    return image.url
+  } catch (err) {
+    return null
+  }
+};
+
+exports.addAdsImgUrl = async (ads) => {
+  return Promise.all( ads.map( 
+    async (ad) => {
+      const url = await getImgUrl(ad.id);
+      return { ...ad, url }
+    }
+  ));
+}; 
+

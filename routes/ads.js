@@ -9,10 +9,9 @@ const {
 	sortAdsByDistance,
 	updateAdvertIsSuccessful,
 	getAdsFromDbWithPriceParams,
-	getLocationDetails
+	getLocationDetails,
+	addAdsImgUrl
 } = require("../utils");
-
-
 
 router.get('/', (req, res) => 
   Advert.findAll({ raw:true })
@@ -105,43 +104,49 @@ router.get('/search', async (req, res) => {
 		console.log(err)
 		res.render("ads", { term, errorMessage: "Failed to connect to database" });
 		return 
-	}
+	};
 
-	if ( !req.user && (min_distance || max_distance) ) {
-		res.render('index', {
-			layout: 'landing', 
-			errorMessage: 'Login required before using the distance filter',
-			...req.query
-		});
-		return 
-	}
+	// render ads view without distance sort / filter
+	if (!req.user) {
+		// check if distance filter is selected when user is not logged in
+		if (min_distance || max_distance) {
+			res.render("index", {
+				layout: "landing",
+				errorMessage: "Login required before using the distance filter",
+				...req.query,
+			});
+			return; 
+		};
+		const adsWithImgUrl = await addAdsImgUrl(ads);
+		res.render("ads", { ads: adsWithImgUrl, term });
+		return 		
+	};
 
+	// User is logged in, add distance to ads
 	if (req.user) {
 		const userLocation = {
 			lat: req.user.latitude,
 			lng: req.user.longitude,
 		};
-		const adswithDistanceFilter = addDistanceForAds(ads, userLocation).filter(
+		const adsWithDistanceFilter = addDistanceForAds(ads, userLocation).filter(
 			(ad) =>
 				(ad.distance > (min_distance || 0) ) && 
 				(ad.distance < (max_distance || 1500) )
 		);
 
-		// render ads view with sort
+		// render ads view with distance sort when selected
 		if ((sort_by === 'distance_desc') || (sort_by === 'distance_asc')) {
-			const adsSortedByDistance = sortAdsByDistance(sort_by, adswithDistanceFilter);	
-			res.render('ads', { ads: adsSortedByDistance, term });
+			const adsSortedByDistance = sortAdsByDistance(sort_by, adswithDistanceFilter);
+			const adsWithImgUrl = await addAdsImgUrl(adsSortedByDistance);
+			res.render('ads', { ads: adsWithImgUrl, term });
 			return;
 		};
 
 		// render ads view without sort 
-		res.render('ads', { ads: adswithDistanceFilter, term });
-
+		const adsWithImgUrl = await addAdsImgUrl(adsWithDistanceFilter);
+		res.render('ads', { ads: adsWithImgUrl, term });
+		return
 	}; 
-
-	// render ads view without sort / filter
-	res.render("ads", { ads, term });
-	return 
 })
 
 router.get('/myads', checkAuthenticated, async (req, res) => {
