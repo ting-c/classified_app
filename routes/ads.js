@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const { multerUploads } = require('../config/multer');
 const Advert = require('../models/Advert');
 const {
 	addDistanceForAds,
@@ -10,29 +11,15 @@ const {
 	updateAdvertIsSuccessful,
 	getAdsFromDbWithPriceParams,
 	getLocationDetails,
-	addAdsImgUrl
+	addAdsImgUrl,
+	addImgUrlInDb,
+	getImgUrlFromStorage
 } = require("../utils");
-
-router.get('/', (req, res) => 
-  Advert.findAll({ raw:true })
-    .then(ads => {
-			if (req.user) {
-				const userLocation = {
-					lat: req.user.latitude,
-					lng: req.user.longitude
-				}
-				res.render('ads', { ads: addDistanceForAds(ads, userLocation) });
-			} else {
-				res.render("ads", { ads });
-			}
-			
-    })
-    .catch(err => console.log(err)));
 
 router.get('/post', checkAuthenticated, (req, res) => res.render('post'));
 
 // Post
-router.post("/post", checkAuthenticated, async (req, res) => {
+router.post("/post", checkAuthenticated, multerUploads, async (req, res) => {
 
 	// Server side validation
 	const fieldsToCheck = [
@@ -61,9 +48,9 @@ router.post("/post", checkAuthenticated, async (req, res) => {
 	const { user, body } = req;
 	const { postcode_type, custom_postcode } = req.body
 
-	let isSuccessful;
+	let advert_id;
 	if (postcode_type === "register") {
-		isSuccessful = postAdWithRegisterPostcode(user, body);
+		advert_id = await postAdWithRegisterPostcode(user, body);
 	} else {
 		const response = await getLocationDetails(custom_postcode);
 		if (!response) { 
@@ -73,80 +60,81 @@ router.post("/post", checkAuthenticated, async (req, res) => {
 			});
 			return
 		}
-		isSuccessful = postAdWithCustomPostcode(user, body, response);
+		advert_id = await postAdWithCustomPostcode(user, body, response);
 	}
 
-	if (isSuccessful) {
-		res.redirect("/ads/myads");
+	if (advert_id) {
+		// successfully added advert in db
+		const { buffer } = req.file;
+
+		// store image and get image url
+		let imgUrl;
+		try {
+			imgUrl = await getImgUrlFromStorage(buffer);
+			if (!imgUrl) {
+				res.render("post", { errorMessage: "Failed to upload image" });
+				return;
+			}
+		} catch (err) {
+			res.render("post", {
+				errorMessage: "Failed to connect to image storage",
+			});
+			return;
+		}
+		console.log(advert_id, imgUrl);
+		// store imgUrl in db
+		const addImgUrlisSuccessful = addImgUrlInDb(advert_id, imgUrl);
+		return addImgUrlisSuccessful ? 
+			res.redirect("/ads/myads") : 
+			res.render('post', { errorMessage: 'Failed to save uploaded image', ...req.body })
 	} else {
 		res.render("post", {
 			errorMessage: "Failed to post advert",
 			...req.body,
 		});
 	}
-
 });
 
 // Search
 router.get('/search', async (req, res) => {
 	const { term, min_price, max_price, min_distance, max_distance, sort_by } = req.query;
 
-	// check if user is login when distance sort is used
-	if (!req.user && (sort_by === 'distance_desc' || sort_by === 'distance_asc')) {
-		res.render('ads', { errorMessage: 'Please login before using distance sort'})
-		return
-	}
-
 	let ads;
 	try {
 		ads = await getAdsFromDbWithPriceParams(term, min_price, max_price, sort_by);
 	} catch (err) {
-		console.log(err)
 		res.render("ads", { term, errorMessage: "Failed to connect to database" });
 		return 
 	};
 
+	const adsWithImgUrl = await addAdsImgUrl(ads);
+
 	// render ads view without distance sort / filter
-	if (!req.user) {
-		// check if distance filter is selected when user is not logged in
-		if (min_distance || max_distance) {
-			res.render("index", {
-				layout: "landing",
-				errorMessage: "Login required before using the distance filter",
-				...req.query,
-			});
-			return; 
-		};
-		const adsWithImgUrl = await addAdsImgUrl(ads);
-		res.render("ads", { ads: adsWithImgUrl, term });
-		return 		
+	if (!req.user) { 
+		res.render('ads', { ads: adsWithImgUrl, term } );
+		return
 	};
 
 	// User is logged in, add distance to ads
-	if (req.user) {
-		const userLocation = {
-			lat: req.user.latitude,
-			lng: req.user.longitude,
-		};
-		const adsWithDistanceFilter = addDistanceForAds(ads, userLocation).filter(
-			(ad) =>
-				(ad.distance > (min_distance || 0) ) && 
-				(ad.distance < (max_distance || 1500) )
-		);
+	const userLocation = {
+		lat: req.user.latitude,
+		lng: req.user.longitude,
+	};
+	const adsWithDistanceFilter = addDistanceForAds(adsWithImgUrl, userLocation).filter(
+		(ad) =>
+			( (ad.distance > (min_distance || 0)) &&  (ad.distance < (max_distance || 1500)) ) 
+			|| (!ad.distance) // to include user's own ads
+	);
 
-		// render ads view with distance sort when selected
-		if ((sort_by === 'distance_desc') || (sort_by === 'distance_asc')) {
-			const adsSortedByDistance = sortAdsByDistance(sort_by, adswithDistanceFilter);
-			const adsWithImgUrl = await addAdsImgUrl(adsSortedByDistance);
-			res.render('ads', { ads: adsWithImgUrl, term });
-			return;
-		};
-
-		// render ads view without sort 
-		const adsWithImgUrl = await addAdsImgUrl(adsWithDistanceFilter);
-		res.render('ads', { ads: adsWithImgUrl, term });
+	if (!sort_by) {
+		res.render('ads', { ads: adsWithDistanceFilter, term });
 		return
-	}; 
+	}
+
+	// render ads view with distance sort
+	const adsSortedByDistance = sortAdsByDistance(sort_by, adsWithDistanceFilter);
+	res.render('ads', { ads: adsSortedByDistance, term });
+	return;
 })
 
 router.get('/myads', checkAuthenticated, async (req, res) => {
@@ -164,8 +152,10 @@ router.get('/myads', checkAuthenticated, async (req, res) => {
 		}); 
 	} catch (err) {
 		res.render('myads', { errorMessage: 'Failed to connect to database'});
-	}
-	res.render('myads', {	ads	});
+	};
+
+	const adsWithImgUrl = await addAdsImgUrl(ads);
+	res.render('myads', {	ads: adsWithImgUrl });
 })
 
 router.post('/edit', checkAuthenticated, async (req, res) => {
@@ -183,7 +173,6 @@ router.post('/edit', checkAuthenticated, async (req, res) => {
 	} catch (err) {
 		console.log(err);
 	}
-
 })
 
 router.post('/save', checkAuthenticated, async (req, res) => {
@@ -219,7 +208,6 @@ router.post('/save', checkAuthenticated, async (req, res) => {
 			...req.body,
 		});
 	};
-
 })
 
 router.post('/delete', checkAuthenticated, async (req, res) => {
@@ -249,7 +237,6 @@ router.post('/delete', checkAuthenticated, async (req, res) => {
 		res.render("edit_ads", { errorMessage: "Failed to delete" });
 		return 
 	}
-	
-})
+});
 
 module.exports = router;

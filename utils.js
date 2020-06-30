@@ -2,6 +2,10 @@ const axios = require("axios");
 const Advert = require("./models/Advert");
 const Image = require("./models/Image");
 const { Op } = require("sequelize");
+const FormData = require("form-data");
+const { datauri } = require('./config/multer');
+const dotenv = require("dotenv");
+dotenv.config();
 
 // Haversine formula
 const getDistance = (p1, p2, isInMiles) => {
@@ -64,7 +68,7 @@ exports.postAdWithCustomPostcode = async (user, body, response) => {
 
   if (status === 200) {
     try {
-      await Advert.create({
+      const ad = await Advert.create({
         ...body,
         seller_id: user.id,
         seller_name: user.name,
@@ -78,7 +82,7 @@ exports.postAdWithCustomPostcode = async (user, body, response) => {
           "" + `${region}, ` ||
           "",
       });
-      return true;
+      return ad.id;
     } catch (err) {
       return false
     }
@@ -89,7 +93,7 @@ exports.postAdWithRegisterPostcode = async (user, body) => {
 	const { postcode, longitude, latitude, location } = user;
 
 	try {
-		await Advert.create({
+		const ad = await Advert.create({
 			...body,
 			seller_id: user.id,
 			seller_name: user.name,
@@ -99,7 +103,7 @@ exports.postAdWithRegisterPostcode = async (user, body) => {
 			latitude,
 			location,
 		});
-		return true
+		return ad.id
 	} catch (err) {
     return false
 	}
@@ -158,7 +162,7 @@ exports.getAdsFromDbWithPriceParams = async (term, min_price, max_price, sort_by
   return ads;
 };
 
-getImgUrl = async (advert_id) => {
+const getImgUrlFromDb = async (advert_id) => {
   try {
     const image = await Image.findOne({
       raw: true,
@@ -173,9 +177,30 @@ getImgUrl = async (advert_id) => {
 exports.addAdsImgUrl = async (ads) => {
   return Promise.all( ads.map( 
     async (ad) => {
-      const url = await getImgUrl(ad.id);
+      const url = await getImgUrlFromDb(ad.id);
       return { ...ad, url }
     }
   ));
 }; 
 
+exports.addImgUrlInDb = async (advert_id, url) => {
+  try {
+    await Image.create({ advert_id, url });
+    return true
+  } catch (err) {
+    return false
+  }
+};
+
+exports.getImgUrlFromStorage = async (buffer) => {
+	
+	const image = datauri.format('.png', buffer).base64;
+	const form = new FormData();
+	form.append('image', image);
+	const url = `https://api.imgbb.com/1/upload?key=${process.env.IMG_API_KEY}`;
+	const response = await axios.post(url, form, {
+		headers: form.getHeaders()
+	});
+	const { status, data } = response.data;
+	return status === 200 ? data.url : null
+};

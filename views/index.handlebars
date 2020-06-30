@@ -15,18 +15,23 @@
       {{/if}}
     <br>
 
-      <div class='form-group bg-secondary my-3 p-2'>
+      <div class='form-group bg-secondary my-3 p-2 shadow-sm'>
       <h5 class='text-center font-weight-bold'>Filters</h5>
         <label class='font-weight-bold'>Price</label><br>
         <span><input name='min_price' class='form-control my-1' type='number' min='0' max='100000' placeholder='Min Price' value={{min_price}}></span>
         <span><input name='max_price' class='form-control my-1' type='number' min='0' max='100000' placeholder='Max Price' value={{max_price}}></span>
 
       <br>
-
         <label class='font-weight-bold'>Distance (miles)</label><br>
-        <span><input name='min_distance' class='form-control my-1' type='number' min='0' max='1500' placeholder='Min Distance'></span>
-        <span><input name='max_distance' class='form-control my-1' type='number' min='0' max='1500' placeholder='Max Distance'></span>
-
+        {{#if user}}
+          <span><input name='min_distance' class='form-control my-1' type='number' min='0' max='1500' placeholder='Min Distance'></span>
+          <span><input name='max_distance' class='form-control my-1' type='number' min='0' max='1500' placeholder='Max Distance'></span>
+      {{else}}
+          <span><input name='min_distance' class='form-control my-1' type='number' min='0' max='1500' placeholder='Min Distance' disabled></span>
+          <span><input name='max_distance' class='form-control my-1' type='number' min='0' max='1500' placeholder='Max Distance' disabled></span>
+          <small class='text-muted'>Login required</small>
+      {{/if}}
+      
       </div>
     </form>
   </div>

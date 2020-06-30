@@ -1,4 +1,4 @@
-<nav class='navbar navbar-dark bg-primary text-white navbar-expand-sm'>
+<nav class='navbar navbar-dark bg-primary text-white navbar-expand-sm sticky-top'>
   <a class="navbar-brand" href="/">
     <img src='LOGO.png' style='height: 4rem' alt='Logo'>
   </a>
@@ -13,15 +13,12 @@
         <a class='nav-link' href='/'>Search ads</a>
       </li>
       <li class='nav-item'>
-        <a class='nav-link' href='/ads'>All ads</a>
-      </li>
-      <li class='nav-item'>
-        <a class='nav-link' href='/ads/myads'>My adverts</a>
-      </li>
-      <li class='nav-item'>
         <a class='nav-link' href='/ads/post'>Post an advert</a>
       </li>
       {{#if user}}
+        <li class='nav-item'>
+          <a class='nav-link' href='/ads/myads'>My adverts</a>
+        </li>
         <li class='nav-item'>
           <a class='nav-link' href="javascript: document.getElementById('logout').submit()">
             Logout

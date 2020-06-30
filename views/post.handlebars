@@ -3,7 +3,7 @@
   <h3 class='text-center m-3'>Post an advert</h3>
   <h4 class='text-center p-1' style='color:red'>{{errorMessage}}</h4>
   <div class='ads row m-2 d-flex flex-column'>
-    <form action='/ads/post' method='POST'>
+    <form action='/ads/post' method='POST' enctype="multipart/form-data">
       <div class="form-group">        
         <label for="title">Title</label>
         <input name='title' type="text" class="form-control" id="title" required value="{{title}}" >
@@ -40,12 +40,17 @@
           <small class="form-text text-muted">Enter a valid postcode</small>
         </div>   
       </div>
-
-    <div class='row d-flex justify-content-center'>
-      <button type="submit" class="btn btn-primary text-center" style='width: 7rem'>
-        Post
-      </button>
-    </div>
+      
+      <div class="form-group">
+        <label for="image">Upload Image</label>
+        <input type="file" name="image" class="form-control-file" id="image">
+      </div>
+     
+      <div class='row d-flex justify-content-center my-3 py-3'>
+        <button type="submit" class="btn btn-primary text-center" style='width: 7rem'>
+          Post
+        </button>
+      </div>
     
     </form>
   </div>

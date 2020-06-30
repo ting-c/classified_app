@@ -17,6 +17,10 @@
     <label>Categories</label>
     <input name="categories" class="form-control" type='text' value="{{categories}}">
   <br>
+    {{#if successMessage}}
+      <div class='text-success text-center'>{{successMessage}}</div>
+    {{/if}}
+  <br>
     <button type="submit" class="btn btn-success" style='width: 7rem'>Save</button>
 
   </form>
@@ -32,12 +36,7 @@
     </form>
   </div>
   
-  <div class='text-success text-center'>
-    {{#if successMessage}}
-      {{successMessage}}
-    {{/if}}
-  </div>
-  
+
   <div class='text-danger text-center'>
     {{#if errorMessage}}
       {{errorMessage}}
