@@ -8,84 +8,46 @@
   </h4>
 
   <div class='row'>
-    <div class="float-right btn-group mx-1 ">
-      <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-        Sort
-      </button>
-      <div class="dropdown-menu bg-light">
-        <form action='/ads/search'>
-          <input name="term" type="hidden" value={{term}}>
-          <button name="sort_by" value='price_desc' class="dropdown-item py-2 text-capitalize" type="submit" style='color: black'>
-            Price (Descending)
+    <button type="button" class="btn btn-info dropdown-toggle m-2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+      Sort
+    </button>
+    <div class="dropdown-menu bg-light">
+      <form action='/ads/search'>
+        <input name="term" type="hidden" value={{term}}>
+        <button name="sort_by" value='price_desc' class="dropdown-item py-2 text-capitalize" type="submit" style='color: black'>
+          ↓ <span class='mx-1'>Price</span>
+        </button>
+        <button name="sort_by" value='price_asc' class="dropdown-item py-2 text-capitalize" type="submit" style='color: black'>
+          ↑ <span class='mx-1'>Price</span>
+        </button>
+        {{#if user}}
+          <button name="sort_by" value='distance_desc' class="dropdown-item py-2 text-capitalize" type="submit" style='color: black'>
+            ↓ <span class='mx-1'>Distance</span>
           </button>
-          <button name="sort_by" value='price_asc' class="dropdown-item py-2 text-capitalize" type="submit" style='color: black'>
-            Price (Ascending)
+          <button name="sort_by" value='distance_asc' class="dropdown-item py-2 text-capitalize" type="submit" style='color: black'>
+            ↑ <span class='mx-1'>Distance</span>
           </button>
-          {{#if user}}
-            <button name="sort_by" value='distance_desc' class="dropdown-item py-2 text-capitalize" type="submit" style='color: black'>
-              Distance (Descending)
-            </button>
-            <button name="sort_by" value='distance_asc' class="dropdown-item py-2 text-capitalize" type="submit" style='color: black'>
-              Distance (Ascending)
-            </button>
-          {{/if}}
-        </form>
-      </div>
-
-      {{#if user}}
-        {{#if ads}}
-        <div class='m-1 text-muted text-center font-italic'>* Distances are calculated from {{user.location}}</div>
         {{/if}}
-      {{/if}}
-    </div>
+      </form>
   </div>
 
   {{#each ads}}
-  <div class='ads card m-3 shadow bg-light'>
-    <div class='card-body'>
-      <img class="card-img-top" src={{url}} alt="Card image cap">
-
-      <div class='bg-secondary p-3'>
-        <h5 class='font-weight-bold text-capitalize'>{{title}}</h5>
-      </div>
-
-      <div class='bg-secondary p-3'>
-        <h5>
-          <span class='float-right'>£ {{price}}</span>
-          {{#if distance}}
-            <span>{{distance}} miles</span>
-          {{/if}}
-        </h5>
-      </div>
-
-      <div class='bg-light p-2 shadow-sm'>
-        <h6 class='font-weight-bold'>Description</h6>
-        <p>{{description}}</p>
-      </div>
-
-      <table class='table table-borderless' style='word-wrap: break-word'>
-        <tr>
-          <td>Categories</td>
-          <td class='text-capitalize'>{{categories}}</td>
-        </tr>
-        <tr>
-          <td>Location</td>
-          <td>{{location}}</td>
-        </tr>
-        <tr>
-          <td>Contact Email</td>
-          <td style='word-break: break-all'>{{contact_email}}</td>
-        </tr>
-        <tr>
-          <td>Seller name</td>
-          <td class='text-capitalize'>{{seller_name}}</td>
-        </tr>
-        <tr>
-          <td>Posted at</td>
-          <td>{{createdAt}}</td>
-        </tr>
-      </table>      
-    
+  <div class='row my-2 p-2 border-top' onclick="javascript: document.getElementById('ads_info_{{id}}').submit()">
+    <form action='/ads/info' method='POST' id='ads_info_{{id}}'>
+      <input name='id' type='hidden' value={{id}}>
+    </form>
+    <div class='col-7 container'>
+      <div class='row text-capitalize' style='font-size: 1.2rem'>{{title}}</div>
+      <div class='row my-1 font-weight-bold' style='font-size: 1.2rem'>£ {{price}}</div>
+      <div class='row my-1 font-italic' style='font-size: 1rem'>{{location}}</div>
+      {{#if distance}}
+        <div class='row text-muted' style='font-size: 1.1rem'>
+          {{distance}} miles from {{../user.postcode}}
+        </div>
+      {{/if}}
+    </div>
+    <div class='col-5' style='height: 100%'>
+      <img class="img-fluid rounded float-right" src={{url}} alt="Item image" style='max-height: 100%'>
     </div>
   </div>
   {{else}}

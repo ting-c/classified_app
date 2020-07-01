@@ -1,0 +1,54 @@
+<div class='container'>
+
+  <div class='ads card shadow bg-light'>
+    <div class='card-body'>
+      <img class="card-img-top" src={{url}} alt="Card image cap">
+
+      <div class='bg-secondary p-3'>
+        <h5 class='font-weight-bold text-capitalize'>{{title}}</h5>
+      </div>
+
+      <div class='bg-secondary p-3'>
+        <h5>
+          <span class='float-right'>£ {{price}}</span>
+          {{#if distance}}
+            <span>{{distance}} miles</span>
+          {{/if}}
+        </h5>
+      </div>
+
+      <div class='bg-light p-2 shadow-sm'>
+        <h6 class='font-weight-bold'>Description</h6>
+        <p>{{description}}</p>
+      </div>
+
+      <table class='table table-borderless' style='word-wrap: break-word'>
+        <tr>
+          <td>Categories</td>
+          <td class='text-capitalize'>{{categories}}</td>
+        </tr>
+        <tr>
+          <td>Location</td>
+          <td>{{location}}</td>
+        </tr>
+        <tr>
+          <td>Contact Email</td>
+          <td style='word-break: break-all'>{{contact_email}}</td>
+        </tr>
+        <tr>
+          <td>Seller name</td>
+          <td class='text-capitalize'>{{seller_name}}</td>
+        </tr>
+        <tr>
+          <td>Posted at</td>
+          <td>{{createdAt}}</td>
+        </tr>
+      </table>      
+
+    </div>
+  </div>
+  {{#if errorMessage}}
+    <div class='row d-flex justify-content-center text-danger'>{{errorMessage}}</div>
+  {{/if}}
+</div>
+

@@ -13,7 +13,8 @@ const {
 	getLocationDetails,
 	addAdsImgUrl,
 	addImgUrlInDb,
-	getImgUrlFromStorage
+	getImgUrlFromStorage,
+	getAdInfo
 } = require("../utils");
 
 router.get('/post', checkAuthenticated, (req, res) => res.render('post'));
@@ -238,5 +239,18 @@ router.post('/delete', checkAuthenticated, async (req, res) => {
 		return 
 	}
 });
+
+router.post('/info', async (req, res) => {
+	const { id } = req.body;
+	try {
+		const ad = await getAdInfo(id);
+		if (!ad) { res.render("ad_info", { errorMessage: "Failed to find advert" }) };
+		console.log(ad)
+		res.render("ad_info", { ...ad });
+	} catch (err) {
+		console.log(err);
+		res.render('ad_info', { errorMessage: 'Failed to connect'});
+	}
+})
 
 module.exports = router;

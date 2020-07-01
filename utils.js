@@ -204,3 +204,9 @@ exports.getImgUrlFromStorage = async (buffer) => {
 	const { status, data } = response.data;
 	return status === 200 ? data.url : null
 };
+
+exports.getAdInfo = async (id) => {
+  const ad = await Advert.findByPk(id, { raw: true });
+  const url = await getImgUrlFromDb(id);
+  return { ...ad, url }
+}
