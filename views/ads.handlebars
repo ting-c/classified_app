@@ -15,17 +15,17 @@
       <form action='/ads/search'>
         <input name="term" type="hidden" value={{term}}>
         <button name="sort_by" value='price_desc' class="dropdown-item py-2 text-capitalize" type="submit" style='color: black'>
-          ↓ <span class='mx-1'>Price</span>
+          Price<span class='mx-1'>↓</span>
         </button>
         <button name="sort_by" value='price_asc' class="dropdown-item py-2 text-capitalize" type="submit" style='color: black'>
-          ↑ <span class='mx-1'>Price</span>
+          Price<span class='mx-1'>↑</span>
         </button>
         {{#if user}}
           <button name="sort_by" value='distance_desc' class="dropdown-item py-2 text-capitalize" type="submit" style='color: black'>
-            ↓ <span class='mx-1'>Distance</span>
+            Distance<span class='mx-1'>↓</span>
           </button>
           <button name="sort_by" value='distance_asc' class="dropdown-item py-2 text-capitalize" type="submit" style='color: black'>
-            ↑ <span class='mx-1'>Distance</span>
+            Distance<span class='mx-1'>↑</span>
           </button>
         {{/if}}
       </form>
@@ -46,9 +46,7 @@
         </div>
       {{/if}}
       <div class='row my-1 text-italic text-muted' style='font-size: 0.9rem'>
-        <div class='col'>
-          Posted {{createdAt}}
-        </div> 
+        Posted on {{createdAt}}
       </div>
     </div>
     <div class='col-5' style='height: 100%'>

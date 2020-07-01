@@ -6,7 +6,7 @@
     <form action='/ads/search' class='form'>
       <div class='form-group d-flex justify-content-center'>
         <input name='term' class='form-control m-1' type='text' placeholder="Looking for.." value={{term}}>
-        <span><button class='btn btn-primary m-1' type='submit'>Search</button></span>        
+        <span><button class='btn btn-success m-1' type='submit'>Search</button></span>        
       </div>
 
     <br>
@@ -15,7 +15,7 @@
       {{/if}}
     <br>
 
-      <div class='form-group bg-secondary my-3 p-2 shadow-sm'>
+      <div class='form-group my-3 p-3 shadow-sm' style='background-color:rgba(221, 222, 255, 0.815)'>
       <h5 class='text-center font-weight-bold'>Filters</h5>
         <label class='font-weight-bold'>Price</label><br>
         <span><input name='min_price' class='form-control my-1' type='number' min='0' max='100000' placeholder='Min Price' value={{min_price}}></span>

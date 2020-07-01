@@ -245,7 +245,6 @@ router.post('/info', async (req, res) => {
 	try {
 		const ad = await getAdInfo(id);
 		if (!ad) { res.render("ad_info", { errorMessage: "Failed to find advert" }) };
-		console.log(ad)
 		res.render("ad_info", { ...ad });
 	} catch (err) {
 		console.log(err);

@@ -1,35 +1,35 @@
-<nav class='navbar navbar-dark bg-primary text-white navbar-expand-sm sticky-top'>
+<nav class='navbar navbar-light navbar-expand-sm sticky-top py-1 px-3' style='background-color:rgb(220, 221, 255)'>
   <a class="navbar-brand" href="/">
-    <img src='LOGO.png' style='height: 4rem' alt='Logo'>
+    <img src='LOGO.png' style='height: 3rem' alt='Logo'>
   </a>
   <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
     aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-    <span class="navbar-toggler-icon"></span>
+    <span class="navbar-toggler-icon" style="height: 1.3rem"></span>
   </button>
 
   <div class="collapse navbar-collapse" id="navbarSupportedContent">
-    <ul class='navbar-nav mr-auto'>
-      <li class='nav-item'>
+    <ul class='navbar-nav mr-auto text-right'>
+      <li class='nav-item py-1'>
         <a class='nav-link' href='/'>Search ads</a>
       </li>
-      <li class='nav-item'>
+      <li class='nav-item py-1'>
         <a class='nav-link' href='/ads/post'>Post an advert</a>
       </li>
       {{#if user}}
-        <li class='nav-item'>
+        <li class='nav-item py-1'>
           <a class='nav-link' href='/ads/myads'>My adverts</a>
         </li>
-        <li class='nav-item'>
+        <li class='nav-item py-1'>
           <a class='nav-link' href="javascript: document.getElementById('logout').submit()">
             Logout
           </a>
           <form id='logout' action='/logout?_method=DELETE' method='POST'></form>
         </li>
       {{else}}
-        <li class='nav-item'>
+        <li class='nav-item py-1'>
           <a class='nav-link' href='/register'>Create account</a>
         </li>
-        <li class='nav-item'>
+        <li class='nav-item py-1'>
           <a class='nav-link' href='/login'>Login</a>
         </li>
       {{/if}}
