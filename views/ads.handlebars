@@ -3,7 +3,7 @@
     {{#if term}}
       Search results for {{term}}
     {{else}}
-      All ads
+      All adverts
     {{/if}}
   </h4>
 
@@ -39,12 +39,17 @@
     <div class='col-7 container'>
       <div class='row text-capitalize' style='font-size: 1.2rem'>{{title}}</div>
       <div class='row my-1 font-weight-bold' style='font-size: 1.2rem'>£ {{price}}</div>
-      <div class='row my-1 font-italic' style='font-size: 1rem'>{{location}}</div>
+      <div class='row my-1 text-success' style='font-size: 0.9rem'>{{location}}</div>
       {{#if distance}}
-        <div class='row text-muted' style='font-size: 1.1rem'>
+        <div class='row text-muted' style='font-size: 0.9rem'>
           {{distance}} miles from {{../user.postcode}}
         </div>
       {{/if}}
+      <div class='row my-1 text-italic text-muted' style='font-size: 0.9rem'>
+        <div class='col'>
+          Posted {{createdAt}}
+        </div> 
+      </div>
     </div>
     <div class='col-5' style='height: 100%'>
       <img class="img-fluid rounded float-right" src={{url}} alt="Item image" style='max-height: 100%'>

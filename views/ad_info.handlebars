@@ -1,54 +1,60 @@
 <div class='container'>
 
-  <div class='ads card shadow bg-light'>
-    <div class='card-body'>
-      <img class="card-img-top" src={{url}} alt="Card image cap">
-
-      <div class='bg-secondary p-3'>
-        <h5 class='font-weight-bold text-capitalize'>{{title}}</h5>
+  <div class='row my-3 shadow-sm'>
+    <div class='col'>
+      <div class='row p-2 font-weight-bold text-capitalize' style='font-size: 1.2rem;background-color:rgb(212, 235, 255)'>
+        {{title}}
       </div>
-
-      <div class='bg-secondary p-3'>
-        <h5>
-          <span class='float-right'>£ {{price}}</span>
-          {{#if distance}}
-            <span>{{distance}} miles</span>
-          {{/if}}
-        </h5>
+      <div class='row p-2 align-items-center text-capitalize' style='font-size: 1rem'>
+        <div class="col-8 text-success">
+          {{location}}
+        </div>
+        <div class="col-4 text-right font-weight-bold text-dark" style='font-size: 1.3rem'>
+          £{{price}}
+        </div>
       </div>
-
-      <div class='bg-light p-2 shadow-sm'>
-        <h6 class='font-weight-bold'>Description</h6>
-        <p>{{description}}</p>
-      </div>
-
-      <table class='table table-borderless' style='word-wrap: break-word'>
-        <tr>
-          <td>Categories</td>
-          <td class='text-capitalize'>{{categories}}</td>
-        </tr>
-        <tr>
-          <td>Location</td>
-          <td>{{location}}</td>
-        </tr>
-        <tr>
-          <td>Contact Email</td>
-          <td style='word-break: break-all'>{{contact_email}}</td>
-        </tr>
-        <tr>
-          <td>Seller name</td>
-          <td class='text-capitalize'>{{seller_name}}</td>
-        </tr>
-        <tr>
-          <td>Posted at</td>
-          <td>{{createdAt}}</td>
-        </tr>
-      </table>      
-
+      {{#if distance}}
+        <div class='row p-2' style='font-size: 1rem'>
+          {{distance}} miles from {{../user.postcode}}
+        </div>
+      {{/if}}
     </div>
   </div>
-  {{#if errorMessage}}
-    <div class='row d-flex justify-content-center text-danger'>{{errorMessage}}</div>
-  {{/if}}
+
+  <div class='row shadow-sm'>
+    <img class="img-fluid" src={{url}} alt="Item image" style='max-height: 600px'>
+  </div>
+
+  <div class='row my-3 shadow-sm' style='font-size: 1rem'>
+    <div class='col'>
+      <div class='row p-2 font-weight-bold' style='font-size: 1.1rem;background-color:rgb(212, 235, 255)'>Posted</div>
+      <div class='row p-2 text-capitalize' style='font-size: 1rem'>
+        {{createdAt}}
+      </div>
+    </div>
+  </div>
+
+  <div class='row my-3 shadow-sm'>
+    <div class='col'>
+      <div class='row p-2 font-weight-bold' style='font-size: 1.1rem;background-color:rgb(212, 235, 255)'>Description</div>
+      <div class='row p-2 text-capitalize' style='font-size: 1rem'>
+        {{description}}
+      </div>
+    </div>
+  </div>
+
+  <div class='row my-3 shadow-sm'>
+    <div class='col'>
+      <div class='row p-2 font-weight-bold' style='font-size: 1.1rem;background-color:rgb(212, 235, 255)'>Seller</div>
+      <div class='row p-2 text-capitalize' style='font-size: 1rem'>
+        {{seller_name}}
+      </div>
+      <div class='row p-2 text-success' style='font-size: 1rem'>
+        {{contact_email}}
+      </div>
+    </div>
+  </div>
+
 </div>
+
 
