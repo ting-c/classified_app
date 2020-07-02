@@ -73,34 +73,31 @@ router.post("/post", checkAuthenticated, async (req, res) => {
 			...req.body,
 		});
 	};
-
 });
 
 router.post("/upload", checkAuthenticated, multerUploads, async (req, res) => {
 
 	const { advert_id, title } = req.body;
-	if (!req.file) {
-		res.render("upload", { errorMessage: "Image not found", advert_id, title });
+	if (!req.files) {
+		res.render("upload", { errorMessage: "Image(s) not found", advert_id, title });
+		return
 	};
-	const { buffer } = req.file;
-
-	// store image and get image url
-	let imgUrl;
+	
+	// store images and get image urls
+	let urls;
 	try {
-		imgUrl = await getImgUrlFromStorage(buffer);
-		if (!imgUrl) {
-			res.render("upload", { errorMessage: "Failed to upload image" });
-			return;
-		}
+		urls = await Promise.all(req.files.map( async image => 
+			await getImgUrlFromStorage(image.buffer)
+		))	
 	} catch (err) {
-		res.render("upload", {
+			res.render("upload", {
 			errorMessage: "Failed to connect to image storage",
 		});
 		return;
 	}
 
-	// store imgUrl in db
-	const addImgUrlisSuccessful = addImgUrlInDb(advert_id, imgUrl);
+	// store image urls in db
+	const addImgUrlisSuccessful = addImgUrlInDb(advert_id, urls);
 	return addImgUrlisSuccessful
 		? res.render("myads", { successMessage: 'Image uploaded successfully'})
 		: res.render("upload", {
@@ -136,7 +133,6 @@ router.get('/search', async (req, res) => {
 	const adsWithDistanceFilter = addDistanceForAds(adsWithImgUrl, userLocation).filter(
 		(ad) =>
 			( (ad.distance >= (min_distance || 0)) &&  (ad.distance <= (max_distance || 1500)) ) 
-			 // to include user's own ads
 	);
 
 	if (!sort_by) {
@@ -183,7 +179,7 @@ router.post('/edit', checkAuthenticated, async (req, res) => {
 		};
 		res.render('edit_ads', { ...ad });
 	} catch (err) {
-		console.log(err);
+		res.render("myads", { errorMessage: "Failed to update advert" });
 	}
 })
 
@@ -258,7 +254,6 @@ router.post('/info', async (req, res) => {
 		if (!ad) { res.render("ad_info", { errorMessage: "Failed to find advert" }) };
 		res.render("ad_info", { ...ad });
 	} catch (err) {
-		console.log(err);
 		res.render('ad_info', { errorMessage: 'Failed to connect'});
 	}
 })

@@ -7,10 +7,12 @@
       {{#if errorMessage}}
         {{> error_message}}
       {{/if}}
-      <form class='form border' action='/ads/upload' method='POST' enctype="multipart/form-data">
+      <form class='form my-3 border' action='/ads/upload' method='POST' enctype="multipart/form-data">
         <input type='hidden' name='advert_id' value={{advert_id}}>
         <label class='m-3' for="image" style='min-height: 10vh;font-size: 1.3rem'>Upload image for {{title}}</label>
-        <input type="file" name="image" class="form-control-file m-2 text-center" id="image" style='min-height: 10vh'>
+        <br>
+        <label class='text-muted'>(Max 3 files)</label>
+        <input type="file" name="image" class="form-control-file m-2 text-center" id="image" style='min-height: 10vh' multiple>
         <button class='btn btn-success m-2' type='submit'>Upload</button>
       </form>
       <form class='form' action='/ads/myads' style='min-height: 10vh'>

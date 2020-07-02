@@ -162,30 +162,30 @@ exports.getAdsFromDbWithPriceParams = async (term, min_price, max_price, sort_by
   return ads;
 };
 
-const getImgUrlFromDb = async (advert_id) => {
+const getImgUrlsFromDb = async (advert_id) => {
   try {
-    const image = await Image.findOne({
+    const images = await Image.findAll({
       raw: true,
       where: { advert_id }
     });
-    return image.url
+    return images.map(image => image.url);
   } catch (err) {
     return null
   }
 };
 
 exports.addAdsImgUrl = async (ads) => {
-  return Promise.all( ads.map( 
+  return await Promise.all( ads.map( 
     async (ad) => {
-      const url = await getImgUrlFromDb(ad.id);
-      return { ...ad, url }
+      const urls = await getImgUrlsFromDb(ad.id);
+      return { ...ad, urls }
     }
   ));
 }; 
 
-exports.addImgUrlInDb = async (advert_id, url) => {
+exports.addImgUrlInDb = async (advert_id, urls) => {
   try {
-    await Image.create({ advert_id, url });
+    await Promise.all(urls.forEach( async url => await Image.create({ advert_id, url })) )
     return true
   } catch (err) {
     return false
@@ -207,6 +207,6 @@ exports.getImgUrlFromStorage = async (buffer) => {
 
 exports.getAdInfo = async (id) => {
   const ad = await Advert.findByPk(id, { raw: true });
-  const url = await getImgUrlFromDb(id);
-  return { ...ad, url }
+  const urls = await getImgUrlsFromDb(id);
+  return { ...ad, urls }
 }
