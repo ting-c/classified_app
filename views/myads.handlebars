@@ -10,49 +10,46 @@
   </div>
 
   {{#each ads}}
-    <div class='ads card m-3 shadow bg-light'>
-
+    <div class='ads card shadow bg-light mb-1'>
       <div class='card-body'>
+
         <img class="card-img-top" src={{url}} alt="Card image cap">
         
         <h5 class='bg-secondary p-2 font-weight-bold'>{{title}}
           <span class='float-right'>£ {{price}}</span>
         </h5>
-        <div class='bg-light p-2 shadow-sm'>
-          <h6 class='font-weight-bold'>Description</h6>
-          <p>{{description}}</p>
-        </div>
+          <div class='p-2'>
+            <h6 class='font-weight-bold'>Description</h6>
+            <p>{{description}}</p>
+          </div>
+          <div class='p-2'>
+            <h6 class='font-weight-bold'>Categories</h6>
+            <p>{{categories}}</p>
+          </div>
+          <div class='p-2'>
+            <h6 class='font-weight-bold'>Location</h6>
+            <p>{{location}}</p>
+          </div>
+          <div class='p-2'>
+            <h6 class='font-weight-bold'>Contact Email</h6>
+            <p>{{contact_email}}</p>
+          </div>
+          <div class='p-2'>
+            <h6 class='font-weight-bold'>Posted on</h6>
+            <p>{{createdAt}}</p>
+          </div>
+          <div class='p-2'>
+            <h6 class='font-weight-bold'>Updated At</h6>
+            <p>{{updatedAt}}</p>
+          </div>
 
-        <table class='table table-borderless' style='word-wrap: break-word'>
-          <tr>
-            <td>Categories</td>
-            <td>{{categories}}</td>
-          </tr>
-          <tr>
-            <td>Location</td>
-            <td>{{location}}</td>
-          </tr>
-          <tr>
-            <td>Contact Email</td>
-            <td style='word-break: break-all'>{{contact_email}}</td>
-          </tr>
-          <tr>
-            <td>Posted at</td>
-            <td>{{createdAt}}</td>
-          </tr>
-          <tr>
-            <td>Updated at</td>
-            <td>{{updatedAt}}</td>
-          </tr>
-        </table>      
-    
-        <form class='text-center' action='/ads/edit' method='POST'>
-          <input name='id' id='id' type='hidden' value={{id}}>
-          <button class='btn btn-info text-center text-white' type='submit' style='width: 40%'>
-            Edit
-          </button>
-        </form>
-
+          <form class='text-center my-1' action='/ads/edit' method='POST'>
+            <input name='id' id='id' type='hidden' value={{id}}>
+            <button class='btn btn-info text-center text-white' type='submit' style='width: 40%'>
+              Edit
+            </button>
+          </form>
+        
       </div>    
     </div>
   {{else}}

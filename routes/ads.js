@@ -123,8 +123,8 @@ router.get('/search', async (req, res) => {
 	};
 	const adsWithDistanceFilter = addDistanceForAds(adsWithImgUrl, userLocation).filter(
 		(ad) =>
-			( (ad.distance > (min_distance || 0)) &&  (ad.distance < (max_distance || 1500)) ) 
-			|| (!ad.distance) // to include user's own ads
+			( (ad.distance >= (min_distance || 0)) &&  (ad.distance <= (max_distance || 1500)) ) 
+			 // to include user's own ads
 	);
 
 	if (!sort_by) {
