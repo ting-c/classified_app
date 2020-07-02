@@ -6,9 +6,17 @@
     {{> success_message}}
   {{/if}}
   <br>
+    {{#if url}}
+      <image src={{url}} style='max-height: 30vh'>
+    {{else}}
+    <form action='/ads/upload' method='POST'>
+      <input name="id" type="hidden" value={{id}}>
+      <button style='btn btn-success'>Upload Image</button>
+    </form>
+    {{/if}}
+  <br>
   <form action='/ads/save' method='POST' class='row d-flex flex-column align-items-center p-2 font-weight-bold'>
     <input name="id" type="hidden" value={{id}}>
-
     <label>Title</label>
     <input name="title" class="form-control" type='text' value="{{title}}">
   <br>

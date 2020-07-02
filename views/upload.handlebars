@@ -1,0 +1,21 @@
+<div class='container'>
+  <div class='card bg-light d-flex justify-content-center align-items-center text-center shadow-sm'>
+    <div class="form-group">
+      {{#if successMessage}}
+        {{> success_message}}
+      {{/if}}
+      {{#if errorMessage}}
+        {{> error_message}}
+      {{/if}}
+      <form class='form border' action='/ads/upload' method='POST' enctype="multipart/form-data">
+        <input type='hidden' name='advert_id' value={{advert_id}}>
+        <label class='m-3' for="image" style='min-height: 10vh;font-size: 1.3rem'>Upload image for {{title}}</label>
+        <input type="file" name="image" class="form-control-file m-2 text-center" id="image" style='min-height: 10vh'>
+        <button class='btn btn-success m-2' type='submit'>Upload</button>
+      </form>
+      <form class='form' action='/ads/myads' style='min-height: 10vh'>
+        <button class="btn btn-primary m-2" type='submit'>Continue without upload</button>
+      </form>
+    </div>
+  </div>
+</div>

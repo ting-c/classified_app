@@ -3,7 +3,7 @@
   <h3 class='text-center m-3'>Post an advert</h3>
   {{#if errorMessage}} {{> error_message}} {{/if}}
   <div class='ads row m-2 d-flex flex-column'>
-    <form action='/ads/post' method='POST' enctype="multipart/form-data">
+    <form action='/ads/post' method='POST'>
       <div class="form-group">        
         <label for="title">Title</label>
         <input name='title' type="text" class="form-control" id="title" required value="{{title}}" >
@@ -39,11 +39,6 @@
           <input name='custom_postcode' type='text' class='form-control' id='custom_postcode' disabled>
           <small class="form-text text-muted">Enter a valid postcode</small>
         </div>   
-      </div>
-      
-      <div class="form-group">
-        <label for="image">Upload Image</label>
-        <input type="file" name="image" class="form-control-file" id="image">
       </div>
      
       <div class='row d-flex justify-content-center my-3 py-3'>

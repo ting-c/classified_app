@@ -3,11 +3,12 @@
     My adverts
   </h4>
   
-  <div class='text-danger'>
-    {{#if errorMessage}}
-      {{errorMessage}}
-    {{/if}}
-  </div>
+  {{#if errorMessage}}
+    {{> error_message}}
+  {{/if}}
+  {{#if successMessage}}
+    {{> success_message}}
+  {{/if}}
 
   {{#each ads}}
     <div class='ads card shadow bg-light mb-1'>
@@ -15,9 +16,10 @@
 
         <img class="card-img-top" src={{url}} alt="Card image cap">
         
-        <h5 class='bg-secondary p-2 font-weight-bold'>{{title}}
-          <span class='float-right'>£ {{price}}</span>
-        </h5>
+        <div class='p-2 font-weight-bold'>
+          <h5 class='font-weight-bold'>{{title}}</h5>
+          <h5>£{{price}}</h5>
+        </div>
           <div class='p-2'>
             <h6 class='font-weight-bold'>Description</h6>
             <p>{{description}}</p>

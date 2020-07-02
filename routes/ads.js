@@ -20,7 +20,7 @@ const {
 router.get('/post', checkAuthenticated, (req, res) => res.render('post'));
 
 // Post
-router.post("/post", checkAuthenticated, multerUploads, async (req, res) => {
+router.post("/post", checkAuthenticated, async (req, res) => {
 
 	// Server side validation
 	const fieldsToCheck = [
@@ -66,34 +66,46 @@ router.post("/post", checkAuthenticated, multerUploads, async (req, res) => {
 
 	if (advert_id) {
 		// successfully added advert in db
-		const { buffer } = req.file;
-
-		// store image and get image url
-		let imgUrl;
-		try {
-			imgUrl = await getImgUrlFromStorage(buffer);
-			if (!imgUrl) {
-				res.render("post", { errorMessage: "Failed to upload image" });
-				return;
-			}
-		} catch (err) {
-			res.render("post", {
-				errorMessage: "Failed to connect to image storage",
-			});
-			return;
-		}
-		console.log(advert_id, imgUrl);
-		// store imgUrl in db
-		const addImgUrlisSuccessful = addImgUrlInDb(advert_id, imgUrl);
-		return addImgUrlisSuccessful ? 
-			res.redirect("/ads/myads") : 
-			res.render('post', { errorMessage: 'Failed to save uploaded image', ...req.body })
+		res.render('upload', { advert_id, title: req.body.title });
 	} else {
 		res.render("post", {
 			errorMessage: "Failed to post advert",
 			...req.body,
 		});
+	};
+
+});
+
+router.post("/upload", checkAuthenticated, multerUploads, async (req, res) => {
+
+	const { advert_id, title } = req.body;
+	if (!req.file) {
+		res.render("upload", { errorMessage: "Image not found", advert_id, title });
+	};
+	const { buffer } = req.file;
+
+	// store image and get image url
+	let imgUrl;
+	try {
+		imgUrl = await getImgUrlFromStorage(buffer);
+		if (!imgUrl) {
+			res.render("upload", { errorMessage: "Failed to upload image" });
+			return;
+		}
+	} catch (err) {
+		res.render("upload", {
+			errorMessage: "Failed to connect to image storage",
+		});
+		return;
 	}
+
+	// store imgUrl in db
+	const addImgUrlisSuccessful = addImgUrlInDb(advert_id, imgUrl);
+	return addImgUrlisSuccessful
+		? res.render("myads", { successMessage: 'Image uploaded successfully'})
+		: res.render("upload", {
+				errorMessage: "Failed to save uploaded image"
+			});
 });
 
 // Search
@@ -163,8 +175,7 @@ router.post('/edit', checkAuthenticated, async (req, res) => {
 	const { id } = req.body;
 	
 	try {
-		const ad = await Advert.findByPk(id, { raw: true });
-
+		const ad = await getAdInfo(id);
 		// check if user is the owner of the advert
 		if (ad.seller_id !== req.user.id) { 
 			res.render('myads', { errorMessage: 'Unauthorized Access'});
