@@ -47,6 +47,7 @@ app.get('/', (req, res) => {
 app.use('/ads', require('./routes/ads'));
 app.use('/register', require('./routes/register'));
 app.use('/login', require('./routes/login'));
+app.use('/message', require('./routes/message'));
 app.delete('/logout', (req, res) => {
   req.logOut();
   res.redirect('/login');

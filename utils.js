@@ -1,6 +1,8 @@
 const axios = require("axios");
 const Advert = require("./models/Advert");
 const Image = require("./models/Image");
+const Message = require("./models/Message");
+const User = require("./models/User");
 const { Op } = require("sequelize");
 const FormData = require("form-data");
 const { datauri } = require('./config/multer');
@@ -209,4 +211,41 @@ exports.getAdInfo = async (id) => {
   const ad = await Advert.findByPk(id, { raw: true });
   const urls = await getImgUrlsFromDb(id);
   return { ...ad, urls }
+};
+
+exports.getMessagesByUserId = async (user_id) => {
+  const messages = await Message.findAll({ 
+    raw: true,
+    where: { recipient_id : user_id }
+  });
+  const messagesWithSenderName = await Promise.all(messages.map(
+    async message => { 
+      const { name } = await User.findByPk(message.sender_id, {
+        raw: true,
+        attributes: ['name']
+      });
+      const { title } = await Advert.findByPk(message.advert_id, {
+        raw: true,
+        attributes: ['title']
+      });
+      return { ...message, sender_name: name, advert_title: title }
+    }
+  ));
+  return messagesWithSenderName
+};
+
+exports.sendMessageIsSuccess = async (sender_id, recipient_id, advert_id, content) => {
+  try {
+    await Message.create({
+			sender_id,
+			recipient_id,
+			advert_id,
+			content,
+			is_read: false,
+    });
+    return true
+  } catch (err) {
+    console.log(err)
+    return false
+  }
 }

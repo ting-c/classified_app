@@ -33,7 +33,7 @@
 
   {{#each ads}}
   <div class='row my-2 p-2 border-top' onclick="javascript: document.getElementById('ads_info_{{id}}').submit()">
-    <form action='/ads/info' method='POST' id='ads_info_{{id}}'>
+    <form action='/ads/info' id='ads_info_{{id}}'>
       <input name='id' type='hidden' value={{id}}>
     </form>
     <div class='col-7 container'>

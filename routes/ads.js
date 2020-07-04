@@ -235,6 +235,7 @@ router.post('/delete', checkAuthenticated, async (req, res) => {
 	// check if user is the owner of the advert
 	if (ad.dataValues.seller_id !== req.user.id) { 
 		res.render('index', { errorMessage: 'Unauthorized Access'});
+		return
 	};
 
 	// delete ad
@@ -243,16 +244,16 @@ router.post('/delete', checkAuthenticated, async (req, res) => {
 		res.redirect("/ads/myads");
 	} catch (err) {
 		res.render("edit_ads", { errorMessage: "Failed to delete" });
-		return 
 	}
 });
 
-router.post('/info', async (req, res) => {
-	const { id } = req.body;
+router.get('/info', async (req, res) => {
+	const { id } = req.query;
 	try {
 		const ad = await getAdInfo(id);
-		if (!ad) { res.render("ad_info", { errorMessage: "Failed to find advert" }) };
-		res.render("ad_info", { ...ad });
+		const { errorMessage, successMessage } = req.session.flash;
+		if (!ad) { res.render("ad_info", { errorMessage: "Failed to find advert" }); return};
+		res.render("ad_info", { ...ad, errorMessage, successMessage });
 	} catch (err) {
 		res.render('ad_info', { errorMessage: 'Failed to connect'});
 	}

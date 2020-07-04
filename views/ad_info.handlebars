@@ -1,5 +1,10 @@
 <div class='container'>
-
+  {{#if successMessage}}
+    {{> success_message}}
+  {{/if}}
+  {{#if errorMessage}}
+    {{> error_message}}
+  {{/if}}
   <div class='row my-3 shadow-sm'>
     <div class='col'>
       <div class='row p-2 font-weight-bold text-capitalize' style='font-size: 1.2rem;background-color:rgb(212, 235, 255)'>
@@ -51,6 +56,19 @@
       </div>
       <div class='row p-2 text-success' style='font-size: 1rem'>
         {{contact_email}}
+      </div>
+      <div class='row p-2 text-success' style='font-size: 1rem'>
+        {{#if user}}
+          <form class='form' action='/message' method='POST'>
+            {{> send_message}}
+          </form>
+          {{else}}
+          <form class='form' action='/message' method='POST'>
+            <fieldset disabled>
+              {{> send_message}}
+            </fieldset>
+          </form>
+        {{/if}}
       </div>
     </div>
   </div>
