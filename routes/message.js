@@ -14,12 +14,14 @@ router.get('/', checkAuthenticated, async (req, res) => {
   } catch (err) {
     return
   };
+  console.log(messages)
   res.render('message', { messages, id });
 });
 
 router.post('/', checkAuthenticated, async (req, res) => {
-  const { recipient_id, content, advert_id } = req.body;
+  const { recipient_id, advert_id } = req.body;
   const { id } = req.user;
+  const content = req.body.content ? req.body.content : req.body.reply_content;
 
   const result = await sendMessageIsSuccess(id, recipient_id, advert_id, content);
   if (!result) {

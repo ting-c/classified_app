@@ -1,4 +1,4 @@
-<div class="container">
+<div class="container" style='word-wrap: break-word'>
   <div class="row d-flex justify-content-center">
     <h4 class='text-center'>Inbox</h4>
   </div>
@@ -8,24 +8,31 @@
         {{#each messages}}
           <div class='row p-3 border-bottom'>
             <div class='col'>
-              <table class='table table-borderless'>
-                <tr>
-                  <th>From:</th>
-                  <td>{{sender_name}}</td>
-                </tr>
-                <tr>
-                  <th>Sent:</th>
-                  <td>{{createdAt}}</td>
-                </tr>
-                <tr>
-                  <th>Advert:</th>
-                  <td><a href=/ads/info?id={{advert_id}}>{{advert_title}}</a></td>
-                </tr>
-                <tr>
-                  <th>Message:</th>
-                  <td>{{content}}</td>
-                </tr>
-              </table>
+              <div class='row mx-2 my-3'>
+                <div class='col'>
+                  <div class='row font-weight-bold'>From:</div>
+                  <div class='row'>{{sender_name}}</div>
+                </div>
+              </div>
+              <div class='row mx-2 my-3'>
+                <div class='col'>
+                  <div class='row font-weight-bold'>Sent:</div>
+                  <div class='row'>{{createdAt}}</div>
+                </div>
+              </div>
+              <div class='row mx-2 my-3'>
+                <div class='col'>
+                  <div class='row font-weight-bold'>Advert:</div>
+                  <div class='row'><a href=/ads/info?id={{advert_id}}>{{advert_title}}</a></div>
+                </div>
+              </div>
+              <div class='row mx-2 my-3'>
+                <div class='col'>
+                  <div class='row font-weight-bold'>Message:</div>
+                  <div class='row'>{{content}}</div>
+                </div>
+              </div>
+
               <div class='row'>
                 <div class='col-3'>
                   <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#replyToggle{{@index}}"
@@ -35,11 +42,17 @@
                 </div>            
                 <div class="col-9 collapse multi-collapse" id="replyToggle{{@index}}">
                   <div class='row'>
-                    <div class='col-8'>
-                      <input class='form-control' type='text'>
-                    </div>
-                    <div class='col-4'>
-                      <button class='btn btn-success'>Send</button>
+                    <div class='col'>
+                      <form action='/message' method='POST' id='reply_message'>
+                        <input name="recipient_id" type="hidden" value={{sender_id}}>
+                        <input name="advert_id" type="hidden" value={{advert_id}}>
+                        <div class='form-group'>
+                          <input name="reply_content" class='form-control' type="text" value="{{reply_content}}" placeholder="Enter message">
+                        </div>
+                        <button type="submit" form="reply_message" class="btn btn-success">
+                          Send
+                        </button>
+                      </form>
                     </div>
                   </div>
                 </div>
