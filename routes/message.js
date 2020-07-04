@@ -14,15 +14,15 @@ router.get('/', checkAuthenticated, async (req, res) => {
   } catch (err) {
     return
   };
-  console.log(messages)
+  console.log('line 17' , messages)
   res.render('message', { messages, id });
 });
 
 router.post('/', checkAuthenticated, async (req, res) => {
-  const { recipient_id, advert_id } = req.body;
+  const { recipient_id, advert_id, is_reply } = req.body;
   const { id } = req.user;
-  const content = req.body.content ? req.body.content : req.body.reply_content;
-
+  const content = is_reply ? req.body.reply_content : req.body.content;
+  console.log('line 25', content)
   const result = await sendMessageIsSuccess(id, recipient_id, advert_id, content);
   if (!result) {
     req.session.flash.errorMessage = 'Failed to send message';

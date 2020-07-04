@@ -43,13 +43,14 @@
                 <div class="col-9 collapse multi-collapse" id="replyToggle{{@index}}">
                   <div class='row'>
                     <div class='col'>
-                      <form action='/message' method='POST' id='reply_message'>
+                      <form action='/message' method='POST'>
+                        <input name="is_reply" type="hidden" value=true>
                         <input name="recipient_id" type="hidden" value={{sender_id}}>
                         <input name="advert_id" type="hidden" value={{advert_id}}>
                         <div class='form-group'>
                           <input name="reply_content" class='form-control' type="text" value="{{reply_content}}" placeholder="Enter message">
                         </div>
-                        <button type="submit" form="reply_message" class="btn btn-success">
+                        <button type="submit" class="btn btn-success">
                           Send
                         </button>
                       </form>
