@@ -1,12 +1,25 @@
 <div class="container" style='word-wrap: break-word'>
+
   <div class="row d-flex justify-content-center">
     <h4 class='text-center'>Inbox</h4>
+  </div>
+  <div class="row">
+    {{#if successMessage}}
+      {{> success_message}}
+    {{/if}}
+    {{#if errorMessage}}
+      {{> error_message}}
+    {{/if}}
   </div>
   <div class="row shadow-sm">
     <div class='col border'>
       {{#if messages}}
         {{#each messages}}
+        {{#if is_read}}
           <div class='row p-3 border-bottom'>
+          {{else}}
+          <div class='row p-3 border-bottom' style='background-color: rgb(236, 236, 236)'>
+        {{/if}}
             <div class='col'>
               <div class='row mx-2 my-3'>
                 <div class='col'>
@@ -32,7 +45,14 @@
                   <div class='row'>{{content}}</div>
                 </div>
               </div>
-
+              {{#unless is_read}}
+                <div class='row my-3'>
+                  <form action='/message/read' method='POST'>
+                    <input name="message_id" type='hidden' value={{id}}>
+                    <button class='btn btn-primary' type='submit'>Mark as read</button>
+                  </form>
+                </div>
+              {{/unless}}
               <div class='row'>
                 <div class='col-3'>
                   <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#replyToggle{{@index}}"
@@ -44,11 +64,11 @@
                   <div class='row'>
                     <div class='col'>
                       <form action='/message' method='POST'>
-                        <input name="is_reply" type="hidden" value=true>
+                        <input name="is_reply" type="hidden" value='true'>
                         <input name="recipient_id" type="hidden" value={{sender_id}}>
                         <input name="advert_id" type="hidden" value={{advert_id}}>
                         <div class='form-group'>
-                          <input name="reply_content" class='form-control' type="text" value="{{reply_content}}" placeholder="Enter message">
+                          <input name="reply_content" class='form-control' type="text" placeholder="Enter message">
                         </div>
                         <button type="submit" class="btn btn-success">
                           Send
@@ -66,16 +86,5 @@
       {{/if}}
 
     </div>
-  </div>
-  
-  <div class="row">
-    {{#if successMessage}}
-      {{> success_message}}
-    {{/if}}
-    {{#if errorMessage}}
-      {{> error_message}}
-    {{/if}}
-
-
   </div>
 </div>

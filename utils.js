@@ -248,4 +248,10 @@ exports.sendMessageIsSuccess = async (sender_id, recipient_id, advert_id, conten
     console.log(err)
     return false
   }
+};
+
+exports.toggleMessageIsRead = async (message_id, is_read) => {
+  await Message.update({ is_read: !is_read }, {
+    where: { id: message_id } 
+  });
 }
