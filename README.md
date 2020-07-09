@@ -24,6 +24,9 @@ To run this project, install it locally by running `npm install`:
 Run `npm dev` to run the app in the development mode with nodemon.<br />
 Open [http://localhost:5000](http://localhost:5000) to view the server side in the browser.
 
+### Testing
+This project uses Jest (version 26.1.0) for testing.
+Run `npm run test` to run tests in the __test__ folder in the root directory.
 
 ### Deployment
 
