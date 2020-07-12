@@ -164,7 +164,7 @@ exports.getAdsFromDbWithPriceParams = async (term, min_price, max_price, sort_by
   return ads;
 };
 
-const getImgUrlsFromDb = async (advert_id) => {
+exports.getImgUrlsFromDb = async (advert_id) => {
   try {
     const images = await Image.findAll({
       raw: true,
@@ -172,6 +172,7 @@ const getImgUrlsFromDb = async (advert_id) => {
     });
     return images.map(image => image.url);
   } catch (err) {
+    console.log(err)
     return null
   }
 };

@@ -1,4 +1,12 @@
-const { addDistanceForAds, sortAdsByDistance } = require("../utils");
+// setup a fake DB connection
+// const SequelizeMock = require("sequelize-mock");
+// const dbMock = new SequelizeMock();
+
+const {
+	addDistanceForAds,
+	sortAdsByDistance,
+	getImgUrlsFromDb,
+} = require("../utils.js");
 
 describe('Testing addDistanceForAds function', () => {
    const mockAds = [
@@ -43,3 +51,9 @@ describe('Testing sortAdsByDistance function', () => {
   });
 });
 
+describe("getImageUrlFromDb", () => {
+	it("should return an array of urls for existing advert", async () => {
+    const urls = await getImgUrlsFromDb(110);
+    expect(urls).toBeInstanceOf(Array);
+  });  
+});
