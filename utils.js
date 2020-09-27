@@ -27,7 +27,7 @@ const getDistance = (p1, p2, isInMiles) => {
   return parseFloat(result.toFixed(1));
 };
 
-exports.addDistanceForAds = (ads, userLocation) => {
+const addDistanceForAds = (ads, userLocation) => {
 	adsWithDistance = [];
 	ads.forEach((ad) => {
 		const sellerLocation = {
@@ -40,14 +40,14 @@ exports.addDistanceForAds = (ads, userLocation) => {
 	return adsWithDistance;
 };
 
-exports.checkAuthenticated = (req, res, next) => {
+const checkAuthenticated = (req, res, next) => {
 	if (req.isAuthenticated()) {
 		return next();
 	}
 	res.redirect("/login");
 };
 
-exports.getLocationDetails = async (postcode) => {
+const getLocationDetails = async (postcode) => {
  try {
 		return await axios.get(
 			`https://api.postcodes.io/postcodes/${postcode}`
@@ -57,7 +57,7 @@ exports.getLocationDetails = async (postcode) => {
 	} 
 }
 
-exports.postAdWithCustomPostcode = async (user, body, response) => {
+const postAdWithCustomPostcode = async (user, body, response) => {
   const { status } = response;
   const {
     postcode,
@@ -91,7 +91,7 @@ exports.postAdWithCustomPostcode = async (user, body, response) => {
   }
 };
 
-exports.postAdWithRegisterPostcode = async (user, body) => {
+const postAdWithRegisterPostcode = async (user, body) => {
 	const { postcode, longitude, latitude, location } = user;
 
 	try {
@@ -122,7 +122,7 @@ const orderParams = (sort_by) => {
 	}
 };
 
-exports.sortAdsByDistance = (sort_by, ads) => {
+const sortAdsByDistance = (sort_by, ads) => {
 	switch (sort_by) {
 		case "distance_asc":
 			return ads.sort( (a, b) => parseFloat(a.distance) - parseFloat(b.distance) )
@@ -133,7 +133,7 @@ exports.sortAdsByDistance = (sort_by, ads) => {
 	};
 };
 
-exports.updateAdvertIsSuccessful = async (ad, fieldsToUpdate) => {
+const updateAdvertIsSuccessful = async (ad, fieldsToUpdate) => {
   try {
     await ad.update({...fieldsToUpdate})
     return true
@@ -142,7 +142,7 @@ exports.updateAdvertIsSuccessful = async (ad, fieldsToUpdate) => {
   }		
 };
 
-exports.getAdsFromDbWithPriceParams = async (term, min_price, max_price, sort_by) => {
+const getAdsFromDbWithPriceParams = async (term, min_price, max_price, sort_by) => {
 
   const ads = await Advert.findAll({
     raw: true,
@@ -164,7 +164,7 @@ exports.getAdsFromDbWithPriceParams = async (term, min_price, max_price, sort_by
   return ads;
 };
 
-exports.getImgUrlsFromDb = async (advert_id) => {
+const getImgUrlsFromDb = async (advert_id) => {
   try {
     const images = await Image.findAll({
       raw: true,
@@ -177,16 +177,21 @@ exports.getImgUrlsFromDb = async (advert_id) => {
   }
 };
 
-exports.addAdsImgUrl = async (ads) => {
+const addAdsImgUrl = async (ads) => {
   return await Promise.all( ads.map( 
     async (ad) => {
-      const urls = await getImgUrlsFromDb(ad.id);
-      return { ...ad, urls }
+      try {
+        const urls = await getImgUrlsFromDb(ad.id);
+        return { ...ad, urls }
+
+      } catch (err) {
+        console.log(err)
+      }
     }
   ));
 }; 
 
-exports.addImgUrlInDb = async (advert_id, urls) => {
+const addImgUrlInDb = async (advert_id, urls) => {
   try {
     await Promise.all(urls.forEach( async url => await Image.create({ advert_id, url })) )
     return true
@@ -195,7 +200,7 @@ exports.addImgUrlInDb = async (advert_id, urls) => {
   }
 };
 
-exports.getImgUrlFromStorage = async (buffer) => {
+const getImgUrlFromStorage = async (buffer) => {
 	
 	const image = datauri.format('.png', buffer).base64;
 	const form = new FormData();
@@ -208,13 +213,13 @@ exports.getImgUrlFromStorage = async (buffer) => {
 	return status === 200 ? data.url : null
 };
 
-exports.getAdInfo = async (id) => {
+const getAdInfo = async (id) => {
   const ad = await Advert.findByPk(id, { raw: true });
   const urls = await getImgUrlsFromDb(id);
   return { ...ad, urls }
 };
 
-exports.getMessagesByUserId = async (user_id) => {
+const getMessagesByUserId = async (user_id) => {
   const messages = await Message.findAll({ 
     raw: true,
     where: { recipient_id : user_id }
@@ -235,7 +240,7 @@ exports.getMessagesByUserId = async (user_id) => {
   return messagesWithSenderName
 };
 
-exports.sendMessageIsSuccess = async (sender_id, recipient_id, advert_id, content) => {
+const sendMessageIsSuccess = async (sender_id, recipient_id, advert_id, content) => {
   try {
     await Message.create({
 			sender_id,
@@ -251,8 +256,28 @@ exports.sendMessageIsSuccess = async (sender_id, recipient_id, advert_id, conten
   }
 };
 
-exports.toggleMessageIsRead = async (message_id, is_read) => {
+const toggleMessageIsRead = async (message_id, is_read) => {
   await Message.update({ is_read: !is_read }, {
     where: { id: message_id } 
   });
+}
+
+module.exports = {
+  addDistanceForAds,
+  checkAuthenticated,
+  getLocationDetails,
+  postAdWithCustomPostcode,
+  postAdWithRegisterPostcode,
+  orderParams,
+  sortAdsByDistance,
+  updateAdvertIsSuccessful,
+  getAdsFromDbWithPriceParams,
+  getImgUrlsFromDb,
+  addAdsImgUrl,
+  addImgUrlInDb,
+  getImgUrlFromStorage,
+  getAdInfo,
+  getMessagesByUserId,
+  sendMessageIsSuccess,
+  toggleMessageIsRead
 }
